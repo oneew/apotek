@@ -1,0 +1,114 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* --- Untitled UI Soft Lilac Branding & Comfortable Dark Mode --- */
+  
+  /* Primary Color: Soft Lavender (#B19CD9 base) */
+  --color-primary-25: #faf8fd;
+  --color-primary-50: #f5f0fa;
+  --color-primary-100: #ede5f5;
+  --color-primary-200: #ddd0ed;
+  --color-primary-300: #ccb8e3;
+  --color-primary-400: #B19CD9;
+  --color-primary-500: #9b82c9;
+  --color-primary-600: #8468b8;
+  --color-primary-700: #6f53a3;
+  --color-primary-800: #5a4188;
+  --color-primary-900: #47336d;
+
+  /* Neutral Gray: Slate/Gray */
+  --color-gray-25: #fcfcfd;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f7;
+  --color-gray-200: #eaecf0;
+  --color-gray-300: #d0d5dd;
+  --color-gray-400: #98a2b3;
+  --color-gray-500: #667085;
+  --color-gray-600: #475467;
+  --color-gray-700: #344054;
+  --color-gray-800: #1d2939;
+  --color-gray-900: #101828;
+  --color-gray-950: #0c111d;
+
+  /* Semantic Colors */
+  --color-success: #12b76a;
+  --color-error: #f04438;
+  --color-warning: #f79009;
+  
+  /* Radius & Shadows */
+  --radius-xl: 12px;
+  --radius-lg: 10px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+  
+  --shadow-xs: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(16, 24, 40, 0.1), 0 1px 2px 0 rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 4px 8px -2px rgba(16, 24, 40, 0.1), 0 2px 4px -2px rgba(16, 24, 40, 0.06);
+}
+
+@layer base {
+  :root {
+    --bg-app: #ffffff;
+    --bg-card: #ffffff;
+    --text-primary: #101828;
+    --text-secondary: #475467;
+    --border-base: #eaecf0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .dark {
+    --bg-app: #18181b;
+    --bg-card: #1e1e24;
+    --text-primary: #f0f0f3;
+    --text-secondary: #a1a1aa;
+    --border-base: #27272a;
+    
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+  }
+
+  body {
+    @apply bg-[var(--bg-app)] text-[var(--text-primary)] transition-colors duration-200;
+  }
+}
+
+@layer components {
+  /* Standard Layout Transitions */
+  .sidebar-transition {
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+
+  /* Premium Inputs */
+  .unt-input {
+    @apply w-full px-3.5 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 
+           rounded-lg shadow-xs text-gray-900 dark:text-gray-100 placeholder-gray-400 
+           transition-all duration-200 
+           focus:outline-none focus:ring-4 focus:ring-primary-100 focus:border-primary-300;
+  }
+
+  /* Shadows Utilities */
+  .unt-shadow-sm { box-shadow: var(--shadow-sm); }
+  .unt-shadow-md { box-shadow: var(--shadow-md); }
+}
+
+@layer utilities {
+  .animate-unt-fade {
+    animation: untFade 0.3s ease-out;
+  }
+  
+  .animate-unt-slide-up {
+    animation: untSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes untFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes untSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
