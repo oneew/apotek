@@ -102,14 +102,14 @@ export default function ProdukLab() {
   };
 
   const columns = [
-    { label: 'Identifier', key: 'kode_produk', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val || 'N/A'}</span> },
-    { label: 'Lab Product Name', key: 'nama_produk', render: (val) => (
+    { label: 'Identifier', key: 'kode_produk', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val || '-'}</span> },
+    { label: 'Nama Produk Lab', key: 'nama_produk', render: (val) => (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <span className="text-[10px] text-gray-500 font-medium tracking-tight">DIAGNOSTIC TEST REPOSITORY</span>
+        <span className="text-[10px] text-gray-500 font-medium tracking-tight">REPOSITORI TES DIAGNOSTIK</span>
       </div>
     )},
-    { label: 'Standard Fee', key: 'harga', width: '180px', align: 'right', render: (val) => (
+    { label: 'Tarif Standar', key: 'harga', width: '180px', align: 'right', render: (val) => (
       <span className="font-bold text-gray-900 dark:text-gray-100 tabular-nums">
         {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val)}
       </span>
@@ -119,10 +119,10 @@ export default function ProdukLab() {
         {val}
       </span>
     ) },
-    { label: '', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
+    { label: 'Aksi', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
       <div className="flex gap-1 justify-end">
-        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"><FiEdit2 size={16} /></button>
-        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20"><FiTrash2 size={16} /></button>
+        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" title="Edit"><FiEdit2 size={16} /></button>
+        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20" title="Hapus"><FiTrash2 size={16} /></button>
       </div>
     ) }
   ];
@@ -130,8 +130,8 @@ export default function ProdukLab() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Diagnostic Products" 
-        subtitle="Manage laboratory test items and diagnostic checkup services fee structures."
+        title="Produk Diagnostik" 
+        subtitle="Kelola item tes laboratorium dan struktur biaya layanan pemeriksaan diagnostik."
         icon={<FiThermometer size={24} className="text-gray-500" />}
       />
 
@@ -142,16 +142,16 @@ export default function ProdukLab() {
           isLoading={isLoading}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter diagnostic catalog..."
-          primaryAction={{ label: "Add Diagnostic Item", onClick: () => handleOpenModal() }}
+          searchPlaceholder="Filter katalog diagnostik..."
+          primaryAction={{ label: "Tambah Item Diagnostik", onClick: () => handleOpenModal() }}
         />
       </div>
 
       <ModalDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? 'Modify Test Identity' : 'Test Registration'}
-        subtitle="Establishing boundaries for diagnostic laboratory services."
+        title={isEditing ? 'Ubah Identitas Tes' : 'Registrasi Tes'}
+        subtitle="Menetapkan batasan untuk layanan laboratorium diagnostik."
         icon={<FiThermometer />}
         maxWidth="max-w-xl"
       >
@@ -159,34 +159,34 @@ export default function ProdukLab() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
               <FiThermometer className="text-primary-600" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Test Attributes</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Atribut Tes</h3>
             </div>
             
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Product Identifier (Code)</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Identifier Produk (Kode)</label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none uppercase font-mono" 
                   value={formData.kode_produk} 
                   onChange={(e) => setFormData({...formData, kode_produk: e.target.value})} 
-                  placeholder="Ex: LAB-GDA" 
+                  placeholder="Cth: LAB-GDA" 
                 />
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Formal Test Designation <span className="text-red-500 font-bold">*</span></label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Penamaan Tes Formal <span className="text-red-500 font-bold">*</span></label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" 
                   value={formData.nama_produk} 
                   onChange={(e) => setFormData({...formData, nama_produk: e.target.value})} 
-                  placeholder="Ex: Gula Darah Acak" 
+                  placeholder="Cth: Gula Darah Acak" 
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Standard Service Fee (IDR)</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tarif Layanan Standar (IDR)</label>
                 <input 
                   type="number" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" 
@@ -196,7 +196,7 @@ export default function ProdukLab() {
                 />
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Operational Integrity</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Integritas Operasional</label>
                 <select 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all appearance-none cursor-pointer" 
                   value={formData.status} 
@@ -210,13 +210,13 @@ export default function ProdukLab() {
           </div>
           
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Batal</button>
             <button 
               className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50" 
               onClick={handleSave} 
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Syncing...' : 'Save Diagnostic Item'}
+              {isSubmitting ? 'Sinkronisasi...' : 'Simpan Item Diagnostik'}
             </button>
           </div>
         </div>

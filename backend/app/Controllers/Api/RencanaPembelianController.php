@@ -81,14 +81,22 @@ class RencanaPembelianController extends ResourceController
     public function defecta()
     {
         $db = \Config\Database::connect();
-        // Get products where total stock from t_stok_batch < stok_minimal
-        $data = $db->table('m_produk p')
-            ->select('p.id, p.nama_produk, p.sku, p.stok_minimal, IFNULL(SUM(b.stok_tersedia), 0) as stok_sekarang, p.pabrik_prinsipal, p.harga_beli_referensi')
-            ->join('t_stok_batch b', 'b.produk_id = p.id', 'left')
-            ->groupBy('p.id')
-            ->having('stok_sekarang < p.stok_minimal')
-            ->where('p.stok_minimal >', 0)
-            ->get()->getResultArray();
+        
+        // Select products where (total stock < stok_minimal) OR (there are recorded lost sales)
+        $sql = "
+            SELECT 
+                p.id, p.nama_produk, p.sku, p.stok_minimal, 
+                IFNULL(SUM(b.stok_tersedia), 0) as stok_sekarang, 
+                p.pabrik_prinsipal, p.harga_beli_referensi,
+                (SELECT IFNULL(SUM(rt.jumlah), 0) FROM t_penjualan_tertolak rt WHERE rt.produk_id = p.id) as lost_sales_qty
+            FROM m_produk p
+            LEFT JOIN t_stok_batch b ON b.produk_id = p.id
+            GROUP BY p.id
+            HAVING (stok_sekarang < p.stok_minimal AND p.stok_minimal > 0) OR (lost_sales_qty > 0)
+            ORDER BY lost_sales_qty DESC, p.nama_produk ASC
+        ";
+
+        $data = $db->query($sql)->getResultArray();
 
         return $this->respond([
             'status' => true,

@@ -46,8 +46,8 @@ export default function MasterKategoriPelanggan() {
     if (!formData.nama_kategori) {
       Swal.fire({
         icon: 'warning',
-        title: 'Validation Error',
-        text: 'Category Name is a required field.',
+        title: 'Kesalahan Validasi',
+        text: 'Nama Kategori wajib diisi.',
         confirmButtonColor: '#7F56D9'
       });
       return;
@@ -69,8 +69,8 @@ export default function MasterKategoriPelanggan() {
       if (result.status) {
         Swal.fire({
           icon: 'success',
-          title: 'Synchronized',
-          text: 'Loyalty tier has been successfully updated.',
+          title: 'Sinkronisasi Berhasil',
+          text: 'Tingkatan loyalitas telah diperbarui.',
           showConfirmButton: false,
           timer: 1500
         });
@@ -79,7 +79,7 @@ export default function MasterKategoriPelanggan() {
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Sync Failure',
+          title: 'Gagal Sinkronisasi',
           text: result.message,
           confirmButtonColor: '#7F56D9'
         });
@@ -87,8 +87,8 @@ export default function MasterKategoriPelanggan() {
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'System Error',
-        text: 'Persistence infrastructure is currently restricted.',
+        title: 'Kesalahan Sistem',
+        text: 'Infrastruktur persistensi saat ini sedang dibatasi.',
         confirmButtonColor: '#7F56D9'
       });
     } finally {
@@ -98,14 +98,14 @@ export default function MasterKategoriPelanggan() {
 
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
-      title: 'Authorize Purge?',
-      text: "This loyalty tier and its associated discount structures will be removed.",
+      title: 'Otorisasi Penghapusan?',
+      text: "Tingkatan loyalitas ini dan struktur diskon terkait akan dihapus.",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#D92D20',
       cancelButtonColor: '#98A2B3',
-      confirmButtonText: 'Confirm Deletion',
-      cancelButtonText: 'Abort'
+      confirmButtonText: 'Konfirmasi Hapus',
+      cancelButtonText: 'Batal'
     });
 
     if (confirm.isConfirmed) {
@@ -115,35 +115,35 @@ export default function MasterKategoriPelanggan() {
         if (result.status) {
           Swal.fire({
             icon: 'success',
-            title: 'Purged',
-            text: 'Tier data has been successfully removed.',
+            title: 'Terhapus',
+            text: 'Data tingkatan berhasil dihapus.',
             timer: 1500,
             showConfirmButton: false
           });
           fetchItems();
         }
       } catch (err) {
-        Swal.fire('Error!', 'Failed to terminate tier record.', 'error');
+        Swal.fire('Error!', 'Gagal menghapus rekaman tingkatan.', 'error');
       }
     }
   };
 
   const columns = [
-    { label: 'Tier Designation', key: 'nama_kategori', render: (val) => (
+    { label: 'Penamaan Tingkat', key: 'nama_kategori', render: (val) => (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <span className="text-[10px] text-gray-500 font-medium tracking-tight">LOYALTY PROGRAM TIER</span>
+        <span className="text-[10px] text-gray-500 font-medium tracking-tight">TINGKAT PROGRAM LOYALITAS</span>
       </div>
     )},
-    { label: 'Discount Matrix', key: 'potongan_persen', width: '180px', align: 'center', render: (val) => (
+    { label: 'Matriks Diskon', key: 'potongan_persen', width: '180px', align: 'center', render: (val) => (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-300 border border-success-200 dark:border-success-800 rounded-full text-[10px] font-bold uppercase tracking-tight">
-        <FiPercent size={10} /> {val}% Adjustment
+        <FiPercent size={10} /> Penyesuaian {val}%
       </span>
     )},
-    { label: '', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
+    { label: 'Aksi', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
       <div className="flex gap-1 justify-end">
-        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all"><FiTag size={16} /></button>
-        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 hover:bg-error-50 dark:hover:bg-error-900/20 rounded-lg transition-all"><FiTrash2 size={16} /></button>
+        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-primary-600 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all" title="Edit"><FiTag size={16} /></button>
+        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 hover:bg-error-50 dark:hover:bg-error-900/20 rounded-lg transition-all" title="Hapus"><FiTrash2 size={16} /></button>
       </div>
     ) }
   ];
@@ -151,8 +151,8 @@ export default function MasterKategoriPelanggan() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Customer Segments" 
-        subtitle="Manage loyalty tiers and dynamic discount structures for patient groups."
+        title="Segmen Pelanggan" 
+        subtitle="Kelola tingkatan loyalitas dan struktur diskon dinamis untuk grup pasien."
         icon={<FiUsers size={24} className="text-gray-500" />}
       />
 
@@ -163,16 +163,16 @@ export default function MasterKategoriPelanggan() {
           isLoading={isLoading}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter tier keywords..."
-          primaryAction={{ label: "Add Tier", onClick: () => handleOpenModal() }}
+          searchPlaceholder="Filter kata kunci tingkatan..."
+          primaryAction={{ label: "Tambah Tingkat", onClick: () => handleOpenModal() }}
         />
       </div>
 
       <ModalDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? 'Modify Loyalty Tier' : 'Tier Registration'}
-        subtitle="Establishing discount matrixes for customer groups."
+        title={isEditing ? 'Ubah Tingkat Loyalitas' : 'Registrasi Tingkat'}
+        subtitle="Menetapkan matriks diskon untuk grup pelanggan."
         icon={<FiUsers />}
         maxWidth="max-w-md"
       >
@@ -180,22 +180,22 @@ export default function MasterKategoriPelanggan() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
               <FiUsers className="text-primary-600" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Tier Attributes</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Atribut Tingkat</h3>
             </div>
             
             <div className="space-y-4">
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Tier Designation <span className="text-red-500 font-bold">*</span></label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Penamaan Tingkat <span className="text-red-500 font-bold">*</span></label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none uppercase" 
                   value={formData.nama_kategori} 
                   onChange={(e) => setFormData({...formData, nama_kategori: e.target.value})} 
-                  placeholder="Ex: PREMIUM MEMBER" 
+                  placeholder="Cth: MEMBER PREMIUM" 
                 />
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Adjustment Percentage (%)</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Persentase Penyesuaian (%)</label>
                 <div className="relative">
                   <input 
                     type="number" 
@@ -211,13 +211,13 @@ export default function MasterKategoriPelanggan() {
           </div>
           
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Batal</button>
             <button 
               className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50" 
               onClick={handleSave} 
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Syncing...' : 'Save Tier Record'}
+              {isSubmitting ? 'Sinkronisasi...' : 'Simpan Data Tingkat'}
             </button>
           </div>
         </div>

@@ -21,7 +21,8 @@ export default function Login() {
     setIsLoading(true);
     try {
       await login(username, password);
-      navigate('/select-outlet');
+      localStorage.setItem('selected_outlet', JSON.stringify({ id: 1, name: 'Apotek Utama', outlet_code: 'pusat', logo: '🏥' }));
+      navigate('/shift');
     } catch (err) {
       setError(err.response?.data?.message || 'Login gagal. Periksa username dan password Anda.');
     } finally {

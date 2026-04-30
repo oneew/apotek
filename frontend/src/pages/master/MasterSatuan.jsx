@@ -44,7 +44,7 @@ export default function MasterSatuan() {
 
   const handleSave = async () => {
     if (!formData.nama_satuan) {
-      Swal.fire({ title: 'Operational Halt', text: 'Unit Name is a required field.', icon: 'warning', confirmButtonColor: '#7F56D9' });
+      Swal.fire({ title: 'Aksi Berhenti', text: 'Nama Satuan wajib diisi.', icon: 'warning', confirmButtonColor: '#7F56D9' });
       return;
     }
 
@@ -62,14 +62,14 @@ export default function MasterSatuan() {
       });
       const result = await response.json();
       if (result.status) {
-        Swal.fire({ title: 'Success', text: 'Unit specification has been synchronized.', icon: 'success', timer: 1500, showConfirmButton: false });
+        Swal.fire({ title: 'Berhasil', text: 'Spesifikasi satuan telah sinkron.', icon: 'success', timer: 1500, showConfirmButton: false });
         setIsModalOpen(false);
         fetchItems();
       } else {
-        Swal.fire({ title: 'Constraint Violation', text: result.message, icon: 'error' });
+        Swal.fire({ title: 'Pelanggaran Aturan', text: result.message, icon: 'error' });
       }
     } catch (err) {
-      Swal.fire({ title: 'Sync Error', text: 'Infrastructure is currently unresponsive.', icon: 'error' });
+      Swal.fire({ title: 'Kesalahan Sinkronisasi', text: 'Infrastruktur saat ini tidak responsif.', icon: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -77,14 +77,14 @@ export default function MasterSatuan() {
 
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
-      title: 'Authorize Deletion?',
-      text: "This asset unit will be permanently removed from the ledger.",
+      title: 'Otorisasi Penghapusan?',
+      text: "Satuan aset ini akan dihapus secara permanen dari buku besar.",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#D92D20',
       cancelButtonColor: '#98A2B3',
-      confirmButtonText: 'Confirm Deletion',
-      cancelButtonText: 'Abort'
+      confirmButtonText: 'Konfirmasi Hapus',
+      cancelButtonText: 'Batal'
     });
 
     if (confirm.isConfirmed) {
@@ -92,25 +92,25 @@ export default function MasterSatuan() {
         const response = await fetch(`http://localhost:8080/api/master/satuan/${id}`, { method: 'DELETE' });
         const result = await response.json();
         if (result.status) {
-          Swal.fire({ title: 'Removed', text: 'Unit entry has been purged.', icon: 'success', timer: 1200, showConfirmButton: false });
+          Swal.fire({ title: 'Terhapus', text: 'Entri satuan telah dibersihkan.', icon: 'success', timer: 1200, showConfirmButton: false });
           fetchItems();
         }
       } catch (err) {
-        Swal.fire({ title: 'Purge Failed', text: 'Security constraints prevented deletion.', icon: 'error' });
+        Swal.fire({ title: 'Pembersihan Gagal', text: 'Batasan keamanan mencegah penghapusan.', icon: 'error' });
       }
     }
   };
 
   const columns = [
-    { label: 'Identifier', key: 'kode_satuan', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val || 'N/A'}</span> },
-    { label: 'Unit Specification', key: 'nama_satuan', render: (val) => (
+    { label: 'Kode', key: 'kode_satuan', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val || '-'}</span> },
+    { label: 'Spesifikasi Satuan', key: 'nama_satuan', render: (val) => (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <span className="text-[10px] text-gray-500 font-medium tracking-tight">MEASUREMENT UNIT</span>
+        <span className="text-[10px] text-gray-500 font-medium tracking-tight">SATUAN PENGUKURAN</span>
       </div>
     )},
-    { label: 'Context / Description', key: 'keterangan', render: (val) => <span className="text-gray-500 font-medium text-[11px] leading-relaxed italic">{val || '-'}</span> },
-    { label: '', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
+    { label: 'Konteks / Keterangan', key: 'keterangan', render: (val) => <span className="text-gray-500 font-medium text-[11px] leading-relaxed italic">{val || '-'}</span> },
+    { label: 'Aksi', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
       <div className="flex gap-1 justify-end">
         <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"><FiEdit2 size={16} /></button>
         <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20"><FiTrash2 size={16} /></button>
@@ -121,8 +121,8 @@ export default function MasterSatuan() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Inventory Units" 
-        subtitle="Manage measurement standards for product packaging and dispensing volume."
+        title="Satuan Inventori" 
+        subtitle="Kelola standar pengukuran untuk pengemasan produk dan volume pengeluaran."
         icon={<FiBox size={24} className="text-gray-500" />}
       />
 
@@ -133,16 +133,16 @@ export default function MasterSatuan() {
           isLoading={isLoading}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter logic by unit keyword..."
-          primaryAction={{ label: "Add Unit", onClick: () => handleOpenModal() }}
+          searchPlaceholder="Filter berdasarkan kata kunci satuan..."
+          primaryAction={{ label: "Tambah Satuan", onClick: () => handleOpenModal() }}
         />
       </div>
 
       <ModalDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? 'Modify Specification' : 'Unit Registration'}
-        subtitle="Establishing measurement baselines for the inventory repository."
+        title={isEditing ? 'Ubah Spesifikasi' : 'Registrasi Satuan'}
+        subtitle="Menetapkan dasar pengukuran untuk repositori inventaris."
         icon={<FiTag />}
         maxWidth="max-w-xl"
       >
@@ -150,12 +150,12 @@ export default function MasterSatuan() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
               <FiTag className="text-primary-600" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Unit Attributes</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Atribut Satuan</h3>
             </div>
             
             <div className="grid grid-cols-1 gap-5">
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">System Identifier (Code)</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Identifier Sistem (Kode)</label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none uppercase font-mono" 
@@ -165,7 +165,7 @@ export default function MasterSatuan() {
                 />
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Unit Signature Name <span className="text-red-500 font-bold">*</span></label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Nama Signature Satuan <span className="text-red-500 font-bold">*</span></label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" 
@@ -175,7 +175,7 @@ export default function MasterSatuan() {
                 />
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Operational Context</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Konteks Operasional</label>
                 <textarea 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none resize-none" 
                   value={formData.keterangan} 
@@ -188,13 +188,13 @@ export default function MasterSatuan() {
           </div>
           
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Batal</button>
             <button 
               className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50" 
               onClick={handleSave} 
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Syncing...' : 'Save Unit Record'}
+              {isSubmitting ? 'Sinkronisasi...' : 'Simpan Data Satuan'}
             </button>
           </div>
         </div>

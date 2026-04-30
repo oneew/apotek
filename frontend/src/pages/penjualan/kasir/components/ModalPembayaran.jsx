@@ -6,19 +6,28 @@ export default function ModalPembayaran({
   isOpen, 
   onClose, 
   totalAmount, 
+  pelanggan,
   onConfirm 
 }) {
   const [cashAmount, setCashAmount] = useState(0);
   const [paymentType, setPaymentType] = useState('Tunai');
+  const [usePoints, setUsePoints] = useState(false);
 
   useEffect(() => {
-    if (isOpen) { setCashAmount(0); setPaymentType('Tunai'); }
+    if (isOpen) { setCashAmount(0); setPaymentType('Tunai'); setUsePoints(false); }
   }, [isOpen]);
 
-  const change = Math.max(0, cashAmount - totalAmount);
+  const maxRedeemPoints = Math.floor((pelanggan?.loyalty_points || 0) / 100) * 100;
+  const isEligibleForRedeem = maxRedeemPoints >= 100;
+  const redeemPointsToUse = usePoints && isEligibleForRedeem ? maxRedeemPoints : 0;
+  // 1 titik loyalti = Rp50 diskon
+  const redeemDiscount = usePoints && isEligibleForRedeem ? (redeemPointsToUse * 50) : 0;
+  
+  const finalAmount = Math.max(0, totalAmount - redeemDiscount);
+  const change = Math.max(0, cashAmount - finalAmount);
   
   const quickNominals = [
-    { label: 'Uang Pas', value: totalAmount, color: 'bg-primary-50 text-primary-700' },
+    { label: 'Uang Pas', value: finalAmount, color: 'bg-primary-50 text-primary-700' },
     { label: '50.000', value: 50000, color: 'bg-blue-50 text-blue-700' },
     { label: '100.000', value: 100000, color: 'bg-purple-50 text-purple-700' },
     { label: '200.000', value: 200000, color: 'bg-teal-50 text-teal-700' }
@@ -38,10 +47,28 @@ export default function ModalPembayaran({
       <div className="bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
         <div className="p-6 space-y-5">
           {/* Total */}
-          <div className="bg-gray-50 dark:bg-gray-950 p-5 rounded-xl border border-gray-100 dark:border-gray-800 text-center">
+          <div className="bg-gray-50 dark:bg-gray-950 p-5 rounded-xl border border-gray-100 dark:border-gray-800 text-center relative overflow-hidden">
              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total yang Harus Dibayar</div>
-             <div className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight tabular-nums">{formatCurrency(totalAmount)}</div>
+             <div className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight tabular-nums relative z-10">{formatCurrency(finalAmount)}</div>
+             {redeemDiscount > 0 && <div className="text-xs text-green-600 font-bold mt-1 line-through text-gray-400">{formatCurrency(totalAmount)}</div>}
           </div>
+
+          {pelanggan?.id && (
+            <div className={`p-4 rounded-xl border ${usePoints ? 'bg-amber-50 border-amber-200' : 'bg-white border-gray-200'} transition-colors flex items-center justify-between`}>
+               <div>
+                  <div className="text-xs font-bold text-gray-700">Loyalty Points: {pelanggan.loyalty_points || 0}</div>
+                  {isEligibleForRedeem ? (
+                    <div className="text-[10px] text-gray-500">Bisa tukar {maxRedeemPoints} poin = <span className="text-green-600 font-bold">{formatCurrency(maxRedeemPoints * 50)}</span></div>
+                  ) : (
+                    <div className="text-[10px] text-gray-400">Minimal 100 poin untuk tukar</div>
+                  )}
+               </div>
+               <label className="relative inline-flex items-center cursor-pointer">
+                 <input type="checkbox" className="sr-only peer" checked={usePoints} disabled={!isEligibleForRedeem} onChange={() => setUsePoints(!usePoints)} />
+                 <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500 peer-disabled:opacity-50"></div>
+               </label>
+            </div>
+          )}
 
           {/* Metode Pembayaran */}
           <div className="space-y-2">
@@ -73,12 +100,12 @@ export default function ModalPembayaran({
               <input
                 type="number"
                 autoFocus
-                placeholder={totalAmount.toString()}
+                placeholder={finalAmount.toString()}
                 className="w-full pl-14 pr-4 py-4 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-3xl font-extrabold text-primary-600 dark:text-primary-400 outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all tabular-nums"
                 value={cashAmount || ''}
                 onChange={(e) => setCashAmount(parseFloat(e.target.value) || 0)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && cashAmount >= totalAmount) onConfirm({ cashAmount, paymentType });
+                  if (e.key === 'Enter' && cashAmount >= finalAmount) onConfirm({ cashAmount, paymentType, redeemPoints: redeemPointsToUse, redeemDiscount });
                 }}
               />
             </div>
@@ -109,8 +136,8 @@ export default function ModalPembayaran({
         {/* Tombol Aksi */}
         <div className="px-6 py-5 bg-gray-50 dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800 flex flex-col gap-2">
             <button
-              disabled={cashAmount < totalAmount && paymentType === 'Tunai'}
-              onClick={() => onConfirm({ cashAmount, paymentType })}
+              disabled={cashAmount < finalAmount && paymentType === 'Tunai'}
+              onClick={() => onConfirm({ cashAmount, paymentType, redeemPoints: redeemPointsToUse, redeemDiscount })}
               className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 dark:disabled:bg-gray-800 disabled:text-gray-400 text-white rounded-xl py-3.5 font-bold text-sm transition-all shadow-lg shadow-primary-500/20 flex items-center justify-center gap-2 active:scale-[0.98]"
             >
               <FiCheck />

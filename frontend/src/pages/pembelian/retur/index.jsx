@@ -2,143 +2,103 @@ import React, { useState, useEffect } from 'react';
 import SectionHeader, { DateFilter } from '../../../components/ui/SectionHeader';
 import DataTable from '../../../components/ui/DataTable';
 import ModalRetur from './components/ModalRetur';
-import { FiFilter, FiSearch, FiPlus, FiRotateCcw, FiActivity, FiDatabase } from 'react-icons/fi';
-import { BiFile } from 'react-icons/bi';
+import { FiRepeat, FiPlus, FiFilter, FiSearch, FiTruck, FiBox, FiAlertCircle } from 'react-icons/fi';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
+const API_BASE = 'http://localhost:8080/api';
 
 export default function PembelianRetur() {
   const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
-  // Fetching real data if API exists, else dummy
-  const fetchReturns = async () => {
-    setIsLoading(true);
+  const fetchRetur = async () => {
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/api/master/retur-pembelian');
-      const result = await response.json();
-      if (result.status) setData(result.data);
-      else setData([]); // Keep as array
+      const resp = await axios.get(`${API_BASE}/master/pembelian/retur`);
+      if (resp.data.status) setData(resp.data.data);
     } catch (err) {
-      console.error('Error fetching returns:', err);
-      setData([]); // Fallback to empty array
+      console.error(err);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchReturns();
+    fetchRetur();
   }, []);
 
   const columns = [
+    { key: 'no', label: 'No.', width: '60px', render: (_, __, i) => i + 1 },
     { 
       key: 'tanggal_retur', 
-      label: 'Return Date', 
-      render: (val) => {
-        if (!val) return 'N/A';
-        const d = new Date(val);
-        return <span className="font-semibold text-gray-900 dark:text-gray-100">{d.toLocaleDateString('en-GB')}</span>;
-      }
+      label: 'Tanggal Retur',
+      render: (val) => new Date(val).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
     },
+    { key: 'no_retur', label: 'No. Retur', render: (val) => <span className="font-bold text-primary-600">{val}</span> },
+    { key: 'nama_supplier', label: 'Supplier' },
+    { key: 'nama_produk', label: 'Produk' },
+    { key: 'jumlah', label: 'Qty', align: 'center' },
+    { key: 'alasan', label: 'Alasan' },
     { 
-      key: 'no_retur', 
-      label: 'Return ID', 
-      render: (val) => <span className="font-bold text-primary-700 dark:text-primary-400 uppercase tracking-tight">{val || 'RET-PENDING'}</span> 
-    },
-    { key: 'no_faktur', label: 'Ref Invoice', render: (val) => <span className="font-medium text-gray-500 uppercase text-[10px] tracking-tight">{val}</span> },
-    { key: 'nama_supplier', label: 'Vendor / Supplier', render: (val) => <span className="text-gray-700 dark:text-gray-300 font-semibold text-xs">{val}</span> },
-    { key: 'nama_produk', label: 'Asset Details', render: (val) => <span className="text-gray-600 dark:text-gray-400 font-medium text-[11px] truncate max-w-[200px]">{val}</span> },
-    { 
-      key: 'total_retur', 
-      label: 'Value Compensated',
-      align: 'right',
-      render: (val) => <span className="font-bold text-gray-900 dark:text-gray-100 tabular-nums italic">Rp {parseFloat(val || 0).toLocaleString('id-ID')}</span>
-    },
-    { 
-      key: 'actions', 
-      label: '', 
-      align: 'right',
-      render: () => (
-        <button className="px-4 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:border-primary-500 text-gray-700 dark:text-gray-300 hover:text-primary-600 rounded-lg text-[11px] font-bold transition-all shadow-sm active:scale-95">
-          Audit Detail
-        </button>
+      key: 'status', 
+      label: 'Status',
+      render: (val) => (
+        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+            val === 'Selesai' ? 'bg-green-50 text-green-600 border-green-200' : 'bg-amber-50 text-amber-600 border-amber-200'
+        }`}>
+          {val}
+        </span>
       )
     }
   ];
 
-  const filteredData = (data || []).filter(item => {
-    return (
-      item.no_retur?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.nama_supplier?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.nama_produk?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  });
-
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-12 px-4">
       <SectionHeader 
-        title="Purchase Returns" 
-        subtitle="Manage inventory reversals, damage claims, and vendor reimbursement workflows."
-        icon={<FiRotateCcw size={24} className="text-gray-400" />}
+        title="Retur ke PBF (Supplier)" 
+        subtitle="Pengembalian obat/alkes ke supplier karena rusak, kadaluarsa, atau sisa."
+        icon={<FiRepeat size={24} className="text-amber-500" />}
       >
-          <div className="flex gap-2">
-            <button 
-              className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-95">
-               <BiFile size={16} /> Draft Ledger
-            </button>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-all active:scale-95 border border-primary-700">
-               <FiPlus /> New Return Claim
-            </button>
-          </div>
+        <button 
+           onClick={() => setIsModalOpen(true)}
+           className="flex items-center gap-2 px-6 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-all"
+        >
+          <FiPlus /> Buat Retur Baru
+        </button>
       </SectionHeader>
 
-      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm overflow-hidden">
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          isLoading={isLoading}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter claims by return ID, supplier, or product..."
-        />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center">
+                  <FiTruck size={24} />
+              </div>
+              <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Total Pengiriman</p>
+                  <p className="text-2xl font-black text-gray-900 mt-1">{data.length}</p>
+              </div>
+          </div>
+          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
+              <div className="w-12 h-12 bg-red-50 text-red-600 rounded-xl flex items-center justify-center">
+                  <FiAlertCircle size={24} />
+              </div>
+              <div>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Menunggu Pickup</p>
+                  <p className="text-2xl font-black text-gray-900 mt-1">{data.filter(d => d.status === 'Pending').length}</p>
+              </div>
+          </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm flex items-center justify-between group transition-all">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-primary-50 dark:bg-primary-900/20 text-primary-600 rounded-xl flex items-center justify-center">
-              <FiDatabase size={20} />
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Aggregate Returns (Current Period)</p>
-              <p className="text-xl font-extrabold text-gray-900 dark:text-gray-100 italic tabular-nums group-hover:tracking-tight transition-all">
-                Rp {(Array.isArray(data) ? data : []).reduce((sum, item) => sum + (parseFloat(item.total_retur) || 0), 0).toLocaleString('id-ID')}
-              </p>
-            </div>
-          </div>
-          <FiActivity className="text-gray-100 group-hover:text-primary-100 transition-colors" size={40} />
-        </div>
-
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 shadow-sm flex items-center justify-between group transition-all">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-error-50 dark:bg-error-900/20 text-error-600 rounded-xl flex items-center justify-center">
-              <FiRotateCcw size={20} />
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Transaction Volume</p>
-              <p className="text-xl font-extrabold text-gray-900 dark:text-gray-100 italic tabular-nums group-hover:tracking-tight transition-all">
-                {data.length} <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight ml-1">Claims Filed</span>
-              </p>
-            </div>
-          </div>
-          <FiActivity className="text-gray-100 group-hover:text-error-100 transition-colors" size={40} />
-        </div>
+      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+          <DataTable columns={columns} data={data} isLoading={loading} />
       </div>
-
-      <ModalRetur isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      
+      <ModalRetur 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSaveSuccess={fetchRetur} 
+      />
     </div>
   );
 }

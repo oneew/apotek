@@ -89,15 +89,26 @@ export default function SatusehatSettings() {
               </div>
             </div>
 
-            <div className="space-y-2 mb-8">
-               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Auth Credentials</label>
+            <div className="space-y-4 mb-8">
                <div className="grid grid-cols-2 gap-4">
-                  <div className="relative">
-                    <FiKey className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input type="password" value="********" readOnly className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-4 py-2.5 text-sm font-medium" />
+                  <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Client ID</label>
+                      <div className="relative">
+                        <FiKey className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input type="text" placeholder="Masukkan Client ID" className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-4 py-2.5 text-sm font-medium focus:border-primary-500 transition-all outline-none" />
+                      </div>
                   </div>
-                  <button className="bg-gray-900 hover:bg-black text-white text-xs font-bold uppercase py-2.5 rounded-lg transition-all active:scale-95 shadow-lg shadow-black/10">Update Keys</button>
+                  <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Client Secret</label>
+                      <div className="relative">
+                        <FiShield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input type="password" placeholder="Masukkan Secret Key" className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-4 py-2.5 text-sm font-medium focus:border-primary-500 transition-all outline-none" />
+                      </div>
+                  </div>
                </div>
+               <button onClick={() => Swal.fire('Tersimpan', 'Konfigurasi credentials SATUSEHAT telah diperbarui.', 'success')} className="bg-gray-900 hover:bg-black text-white text-xs font-bold uppercase py-2.5 px-6 rounded-lg transition-all active:scale-95 shadow-lg shadow-black/10">
+                 Simpan Credentials
+               </button>
             </div>
 
             <div className="flex gap-3 pt-6 border-t border-gray-100">

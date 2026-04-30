@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import PageHeader from '../../../components/ui/PageHeader';
 import Card from '../../../components/ui/Card';
-import { FiSearch, FiRefreshCw, FiFileText, FiDollarSign, FiAlertTriangle } from 'react-icons/fi';
+import { FiSearch, FiRefreshCw, FiFileText, FiDollarSign, FiAlertTriangle, FiEye } from 'react-icons/fi';
+import ModalDialog from '../../../components/ui/ModalDialog';
 
 const API_BASE = 'http://localhost:8080/api';
 
@@ -9,6 +10,8 @@ export default function PenjualanRetur() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedSale, setSelectedSale] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const fetchData = (searchQ = '') => {
     setLoading(true);
@@ -19,6 +22,15 @@ export default function PenjualanRetur() {
       .then(result => { if (result.status) setData(result.data || []); })
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
+  };
+
+  const openDetail = (id) => {
+    setDetailLoading(true);
+    fetch(`${API_BASE}/master/penjualan/${id}`)
+      .then(r => r.json())
+      .then(result => { if (result.status) setSelectedSale(result.data); })
+      .catch(err => console.error(err))
+      .finally(() => setDetailLoading(false));
   };
 
   useEffect(() => { fetchData(); }, []);
@@ -39,26 +51,26 @@ export default function PenjualanRetur() {
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl p-4">
+        <div className="bg-white dark:bg-gray-900 border-2 border-primary-200 dark:border-primary-800/50 shadow-sm rounded-xl p-4 hover:border-primary-300 transition-colors">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Retur</span>
-            <FiFileText size={14} className="text-red-500" />
+            <FiFileText size={14} className="text-purple-500" />
           </div>
-          <span className="text-xl font-extrabold text-red-600">{data.length}</span>
+          <span className="text-xl font-extrabold text-gray-900 dark:text-white">{data.length}</span>
         </div>
-        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded-xl p-4">
+        <div className="bg-white dark:bg-gray-900 border-2 border-primary-200 dark:border-primary-800/50 shadow-sm rounded-xl p-4 hover:border-primary-300 transition-colors">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nilai Retur</span>
-            <FiDollarSign size={14} className="text-orange-500" />
+            <FiDollarSign size={14} className="text-purple-500" />
           </div>
-          <span className="text-xl font-extrabold text-orange-600">{fmt(totalNilai)}</span>
+          <span className="text-xl font-extrabold text-gray-900 dark:text-white">{fmt(totalNilai)}</span>
         </div>
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded-xl p-4">
+        <div className="bg-white dark:bg-gray-900 border-2 border-primary-200 dark:border-primary-800/50 shadow-sm rounded-xl p-4 hover:border-primary-300 transition-colors">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Status</span>
-            <FiAlertTriangle size={14} className="text-yellow-500" />
+            <FiAlertTriangle size={14} className="text-purple-500" />
           </div>
-          <span className="text-xl font-extrabold text-yellow-600">{data.length > 0 ? 'Ada Retur' : 'Tidak Ada'}</span>
+          <span className="text-xl font-extrabold text-gray-900 dark:text-white">{data.length > 0 ? 'Ada Retur' : 'Tidak Ada'}</span>
         </div>
       </div>
 
@@ -78,7 +90,7 @@ export default function PenjualanRetur() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 dark:border-gray-800">
-                {['No.', 'Tanggal', 'No. Invoice', 'Pelanggan', 'Pembayaran', 'Total', 'Status'].map((h, i) => (
+                {['No.', 'Tanggal', 'No. Invoice', 'Pelanggan', 'Pembayaran', 'Total', 'Status', 'Aksi'].map((h, i) => (
                   <th key={i} className="py-2.5 px-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
@@ -97,12 +109,42 @@ export default function PenjualanRetur() {
                   <td className="py-2.5 px-3 text-xs text-gray-500">{row.jenis_pembayaran}</td>
                   <td className="py-2.5 px-3 text-xs font-bold text-red-500 tabular-nums text-right">{fmt(row.total_bayar)}</td>
                   <td className="py-2.5 px-3"><span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-500 border border-red-200">Dibatalkan</span></td>
+                  <td className="py-2.5 px-3">
+                    <button onClick={() => openDetail(row.id)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Lihat Detail">
+                      <FiEye size={14} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </Card>
+
+      {/* Detail Modal */}
+      <ModalDialog
+        isOpen={!!selectedSale} onClose={() => setSelectedSale(null)}
+        title="Detail Retur Penjualan" maxWidth="max-w-[700px]"
+      >
+        {selectedSale && (
+          <div className="p-6 space-y-5 border-t border-gray-100 dark:border-gray-800">
+            <div className="grid grid-cols-2 gap-4">
+              <div><span className="text-[10px] font-bold text-gray-400 uppercase">No. Invoice</span><p className="text-sm font-bold text-primary-600 font-mono">{selectedSale.no_invoice}</p></div>
+              <div><span className="text-[10px] font-bold text-gray-400 uppercase">Status</span><p className="text-xs font-bold text-orange-500 uppercase tracking-widest">TRANSAKSI RETUR</p></div>
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-gray-900 dark:text-white mb-2 uppercase tracking-wider">Item Terlibat Retur</h4>
+              <div className="overflow-x-auto bg-gray-50 dark:bg-gray-950 rounded-xl border border-gray-100 dark:border-gray-800">
+                <table className="w-full text-sm">
+                  <thead><tr className="border-b border-gray-200 dark:border-gray-800">{['Produk', 'Qty', 'Total'].map((h, i) => (<th key={i} className="py-2 px-3 text-left text-[10px] font-bold text-gray-400 uppercase">{h}</th>))}</tr></thead>
+                  <tbody>{selectedSale.items?.map((item, i) => (<tr key={i} className="border-b border-gray-100 dark:border-gray-900"><td className="py-2 px-3 text-xs font-semibold">{item.nama_produk}</td><td className="py-2 px-3 text-xs font-bold">{item.jumlah_jual}</td><td className="py-2 px-3 text-xs font-bold">{fmt(item.subtotal)}</td></tr>))}</tbody>
+                </table>
+              </div>
+            </div>
+            <div className="flex justify-end pt-2"><button onClick={() => setSelectedSale(null)} className="px-4 py-2 text-sm font-bold text-gray-500 hover:text-gray-700 transition-colors">Tutup</button></div>
+          </div>
+        )}
+      </ModalDialog>
     </div>
   );
 }

@@ -297,7 +297,7 @@ export default function ModalPesanan({ isOpen, onClose, onSaveSuccess }) {
              </span>
           </div>
           <div className="flex gap-3">
-            <button onClick={onClose} className="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 rounded-lg transition-all">Cancel</button>
+            <button onClick={onClose} className="px-6 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 rounded-lg transition-all">Batal</button>
             <button 
               onClick={handleSave}
               className="inline-flex items-center gap-2 px-8 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-all active:scale-95"

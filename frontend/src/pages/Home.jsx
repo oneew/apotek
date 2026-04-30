@@ -5,7 +5,7 @@ import PageHeader from '../components/ui/PageHeader';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = '/api';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -24,31 +24,30 @@ export default function Home() {
   const formatDate = (d) => { try { return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return d; } };
 
   const quickStats = data ? [
-    { label: 'Penjualan Hari Ini', value: formatCurrency(data.sales.today_total), sub: `${data.sales.today_count} transaksi`, icon: FiDollarSign, color: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20', border: 'border-green-100 dark:border-green-800' },
-    { label: 'Penjualan Bulan Ini', value: formatCurrency(data.sales.month_total), sub: `${data.sales.month_count} transaksi`, icon: FiTrendingUp, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-100 dark:border-blue-800' },
-    { label: 'Total Produk', value: data.counts.produk, sub: `${data.stock.rendah} stok rendah`, icon: FiPackage, color: 'text-purple-600', bg: 'bg-purple-50 dark:bg-purple-900/20', border: 'border-purple-100 dark:border-purple-800' },
-    { label: 'Peringatan Stok', value: data.stock.habis + data.stock.sudah_expired, sub: `${data.stock.habis} habis, ${data.stock.sudah_expired} expired`, icon: FiAlertTriangle, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-red-100 dark:border-red-800' },
+    { label: 'Penjualan Hari Ini', value: formatCurrency(data.sales.today_total), sub: `${data.sales.today_count} transaksi`, icon: FiDollarSign, color: 'text-purple-600', border: 'border-purple-100 dark:border-purple-300' },
+    { label: 'Penjualan Bulan Ini', value: formatCurrency(data.sales.month_total), sub: `${data.sales.month_count} transaksi`, icon: FiTrendingUp, color: 'text-purple-600', border: 'border-purple-100 dark:border-purple-300' },
+    { label: 'Total Produk', value: data.counts.produk, sub: `${data.stock.rendah} stok rendah`, icon: FiPackage, color: 'text-purple-600', border: 'border-purple-100 dark:border-purple-300' },
+    { label: 'Peringatan Stok', value: data.stock.habis + data.stock.sudah_expired, sub: `${data.stock.habis} habis, ${data.stock.sudah_expired} expired`, icon: FiAlertTriangle, color: 'text-purple-600', border: 'border-purple-100 dark:border-purple-300' },
   ] : [];
 
   const quickLinks = [
     { label: 'Buka Kasir', sub: 'Point of Sale', icon: FiShoppingCart, path: '/penjualan/kasir', color: 'bg-primary-600 text-white' },
-    { label: 'Persediaan', sub: 'Cek Stok Produk', icon: FiPackage, path: '/persediaan/daftar-produk', color: 'bg-teal-600 text-white' },
-    { label: 'Pelanggan', sub: 'Database Pelanggan', icon: FiUsers, path: '/kontak/pelanggan', color: 'bg-blue-600 text-white' },
-    { label: 'Pembelian', sub: 'Rencana Pembelian', icon: FiTruck, path: '/pembelian/rencana', color: 'bg-orange-600 text-white' },
+    { label: 'Persediaan', sub: 'Cek Stok Produk', icon: FiPackage, path: '/persediaan/daftar-produk', color: 'bg-primary-600 text-white' },
+    { label: 'Pelanggan', sub: 'Database Pelanggan', icon: FiUsers, path: '/kontak/pelanggan', color: 'bg-primary-600 text-white' },
+    { label: 'Pembelian', sub: 'Rencana Pembelian', icon: FiTruck, path: '/pembelian/rencana', color: 'bg-primary-600 text-white' },
   ];
 
   const dbCards = data ? [
-    { label: 'Pelanggan', value: data.counts.pelanggan, icon: FiUsers, color: 'text-teal-600', bg: 'bg-teal-50' },
-    { label: 'Supplier', value: data.counts.supplier, icon: FiTruck, color: 'text-red-500', bg: 'bg-red-50' },
-    { label: 'Dokter', value: data.counts.dokter, icon: FiUserCheck, color: 'text-blue-500', bg: 'bg-blue-50' },
-    { label: 'Kategori', value: data.counts.kategori, icon: FiPackage, color: 'text-purple-500', bg: 'bg-purple-50' },
+    { label: 'Pelanggan', value: data.counts.pelanggan, icon: FiUsers, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Supplier', value: data.counts.supplier, icon: FiTruck, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Dokter', value: data.counts.dokter, icon: FiUserCheck, color: 'text-purple-600', bg: 'bg-purple-50' },
+    { label: 'Kategori', value: data.counts.kategori, icon: FiPackage, color: 'text-purple-600', bg: 'bg-purple-50' },
   ] : [];
 
   return (
     <div className="animate-unt-fade">
       <PageHeader
         title="Selamat Datang kembali!"
-        subtitle="Berikut ringkasan aktivitas dan status apotek Anda."
         breadcrumbs={[{ label: 'Aplikasi', path: '/' }, { label: 'Beranda' }]}
       />
 
@@ -59,15 +58,12 @@ export default function Home() {
           <div className="absolute -bottom-8 left-8 w-32 h-32 bg-white/5 rounded-full blur-xl" />
 
           <div className="relative z-10 flex-1">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 border border-white/20">
-              <FiActivity size={12} className="animate-pulse" /> Apotek Digital
-            </div>
-            <h2 className="text-2xl font-extrabold mb-2 tracking-tight">Nova Farma — Kasir & Manajemen Apotek</h2>
+            <h2 className="text-2xl font-extrabold mb-2 tracking-tight">Novalia Farma II</h2>
             <p className="text-primary-100 text-sm max-w-xl font-medium leading-relaxed opacity-90">
               Kelola stok obat, transaksi penjualan, dan rekam medis pasien dengan lebih cepat dan elegan.
             </p>
             <div className="flex flex-wrap gap-3 mt-6">
-              <Button onClick={() => navigate('/penjualan/kasir')} className="bg-white text-primary-700 hover:bg-primary-50 border-none font-bold px-6" size="md">
+              <Button onClick={() => navigate('/penjualan/kasir')} variant="outline" className="text-white border-white/30 hover:bg-white/10 font-bold px-6" size="md">
                 Buka Kasir POS
               </Button>
               <Button onClick={() => navigate('/persediaan/daftar-produk')} variant="outline" className="text-white border-white/30 hover:bg-white/10 font-bold px-6" size="md">
@@ -78,7 +74,7 @@ export default function Home() {
 
           <div className="hidden lg:block relative z-10 shrink-0">
             <div className="w-40 h-40 bg-white/10 rounded-3xl border border-white/20 flex items-center justify-center backdrop-blur-md">
-              <span className="text-6xl">🏥</span>
+              <span className="text-6xl">💊</span>
             </div>
           </div>
         </div>
@@ -87,7 +83,7 @@ export default function Home() {
       {/* Quick Stats */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-          {[1,2,3,4].map(i => (
+          {[1, 2, 3, 4].map(i => (
             <div key={i} className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-100 dark:border-gray-800 animate-pulse">
               <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-24 mb-3" />
               <div className="h-7 bg-gray-200 dark:bg-gray-800 rounded w-32" />

@@ -42,7 +42,7 @@ export default function KonsinyasiStok() {
     },
     { 
         key: 'actions', 
-        label: 'Actions', 
+        label: 'Aksi', 
         align: 'right',
         render: () => (
             <button className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-primary-600 transition-colors">

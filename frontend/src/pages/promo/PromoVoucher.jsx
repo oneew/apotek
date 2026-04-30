@@ -63,7 +63,7 @@ export default function PromoVoucher() {
     },
     { 
       key: 'actions', 
-      label: 'Actions', 
+      label: 'Aksi', 
       align: 'right',
       render: (_, row) => (
         <div className="flex gap-2 justify-end">

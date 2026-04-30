@@ -102,16 +102,16 @@ export default function MasterItemPemeriksaan() {
   };
 
   const columns = [
-    { label: 'Clinical Paramater', key: 'nama_item', render: (val) => (
+    { label: 'Parameter Klinis', key: 'nama_item', render: (val) => (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <span className="text-[10px] text-gray-500 font-medium tracking-tight">DIAGNOSTIC METRIC</span>
+        <span className="text-[10px] text-gray-500 font-medium tracking-tight">METRIK DIAGNOSTIK</span>
       </div>
     )},
-    { label: 'Unit', key: 'satuan', width: '120px', render: (val) => <span className="text-gray-600 dark:text-gray-400 font-mono text-xs">{val || 'N/A'}</span> },
-    { label: 'Reference Range', key: 'nilai_normal', render: (val) => (
+    { label: 'Satuan', key: 'satuan', width: '120px', render: (val) => <span className="text-gray-600 dark:text-gray-400 font-mono text-xs">{val || '-'}</span> },
+    { label: 'Rentang Normal', key: 'nilai_normal', render: (val) => (
       <span className="text-xs text-gray-500 italic">
-        {val || 'None established'}
+        {val || 'Tidak ada referensi'}
       </span>
     )},
     { label: 'Status', key: 'status', align: 'center', width: '120px', render: (val) => (
@@ -119,10 +119,10 @@ export default function MasterItemPemeriksaan() {
         {val}
       </span>
     ) },
-    { label: '', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
+    { label: 'Aksi', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
       <div className="flex gap-1 justify-end">
-        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"><FiEdit2 size={16} /></button>
-        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20"><FiTrash2 size={16} /></button>
+        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" title="Edit"><FiEdit2 size={16} /></button>
+        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20" title="Hapus"><FiTrash2 size={16} /></button>
       </div>
     ) }
   ];
@@ -130,8 +130,8 @@ export default function MasterItemPemeriksaan() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Clinical Parameters" 
-        subtitle="Manage diagnostic checkup parameters, measurement units, and reference ranges."
+        title="Parameter Klinis" 
+        subtitle="Kelola parameter pemeriksaan diagnostik, satuan pengukuran, dan rentang referensi."
         icon={<FiFileText size={24} className="text-gray-500" />}
       />
 
@@ -142,16 +142,16 @@ export default function MasterItemPemeriksaan() {
           isLoading={isLoading}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter parameters..."
-          primaryAction={{ label: "Add Parameter", onClick: () => handleOpenModal() }}
+          searchPlaceholder="Filter parameter..."
+          primaryAction={{ label: "Tambah Parameter", onClick: () => handleOpenModal() }}
         />
       </div>
 
       <ModalDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? 'Modify Parameter' : 'Parameter Registration'}
-        subtitle="Establishing diagnostic metrics for clinical assessment."
+        title={isEditing ? 'Ubah Parameter' : 'Registrasi Parameter'}
+        subtitle="Menetapkan metrik diagnostik untuk penilaian klinis."
         icon={<FiFileText />}
         maxWidth="max-w-xl"
       >
@@ -159,43 +159,43 @@ export default function MasterItemPemeriksaan() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
               <FiFileText className="text-primary-600" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Parameter Attributes</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Atribut Parameter</h3>
             </div>
             
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Designation <span className="text-red-500 font-bold">*</span></label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Penamaan <span className="text-red-500 font-bold">*</span></label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" 
                   value={formData.nama_item} 
                   onChange={(e) => setFormData({...formData, nama_item: e.target.value})} 
-                  placeholder="Ex: Tensi Darah" 
+                  placeholder="Cth: Tensi Darah" 
                 />
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Metric Unit</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Satuan Metrik</label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" 
                   value={formData.satuan} 
                   onChange={(e) => setFormData({...formData, satuan: e.target.value})} 
-                  placeholder="Ex: mmHg, mg/dL" 
+                  placeholder="Cth: mmHg, mg/dL" 
                 />
               </div>
             </div>
             <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Reference / Normal Range</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Referensi / Rentang Normal</label>
               <textarea 
                 className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" 
                 value={formData.nilai_normal} 
                 onChange={(e) => setFormData({...formData, nilai_normal: e.target.value})} 
-                placeholder="Ex: 120/80 mmHg" 
+                placeholder="Cth: 120/80 mmHg" 
                 rows="3" 
               />
             </div>
             <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Operational Integrity</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Integritas Operasional</label>
               <select 
                 className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all appearance-none cursor-pointer" 
                 value={formData.status} 
@@ -208,13 +208,13 @@ export default function MasterItemPemeriksaan() {
           </div>
           
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Batal</button>
             <button 
               className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50" 
               onClick={handleSave} 
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Syncing...' : 'Save Parameter Record'}
+              {isSubmitting ? 'Sinkronisasi...' : 'Simpan Data Parameter'}
             </button>
           </div>
         </div>

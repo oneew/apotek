@@ -103,13 +103,13 @@ export default function MasterShift() {
   };
 
   const columns = [
-    { label: 'Shift Name', key: 'nama_shift', render: (val) => (
+    { label: 'Nama Shift', key: 'nama_shift', render: (val) => (
       <div className="flex flex-col">
         <span className="font-semibold text-primary-700 uppercase text-xs tracking-wider">{val}</span>
-        <span className="text-[10px] text-gray-500 font-medium">WORK SCHEDULE TIER</span>
+        <span className="text-[10px] text-gray-500 font-medium">TINGKATAN JADWAL KERJA</span>
       </div>
     )},
-    { label: 'Operational Window', key: 'jam_mulai', render: (_, item) => (
+    { label: 'Jendela Operasional', key: 'jam_mulai', render: (_, item) => (
       <div className="flex items-center gap-2 group">
         <span className="px-3 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg text-xs font-bold font-mono text-gray-700 dark:text-gray-300 transition-all group-hover:border-primary-200">
           {item.jam_mulai}
@@ -125,10 +125,10 @@ export default function MasterShift() {
         {val}
       </span>
     ) },
-    { label: '', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
+    { label: 'Aksi', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
       <div className="flex gap-1 justify-end">
-        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"><FiEdit2 size={16} /></button>
-        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20"><FiTrash2 size={16} /></button>
+        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" title="Edit"><FiEdit2 size={16} /></button>
+        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20" title="Hapus"><FiTrash2 size={16} /></button>
       </div>
     ) }
   ];
@@ -136,8 +136,8 @@ export default function MasterShift() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Shift Scheduling" 
-        subtitle="Manage operational work windows and pharmacy staff duty rotations."
+        title="Penjadwalan Shift" 
+        subtitle="Kelola jam kerja operasional dan rotasi tugas staf apotek."
         icon={<FiClock size={24} className="text-gray-500" />}
       />
 
@@ -148,16 +148,16 @@ export default function MasterShift() {
           isLoading={isLoading}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter shift windows..."
-          primaryAction={{ label: "Add Shift", onClick: () => handleOpenModal() }}
+          searchPlaceholder="Filter jendela shift..."
+          primaryAction={{ label: "Tambah Shift", onClick: () => handleOpenModal() }}
         />
       </div>
 
       <ModalDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? 'Modify Shift Window' : 'New Shift Registration'}
-        subtitle="Establishing precise operational duty increments."
+        title={isEditing ? 'Ubah Jendela Shift' : 'Registrasi Shift Baru'}
+        subtitle="Menetapkan inkremen tugas operasional yang presisi."
         icon={<FiClock />}
         maxWidth="max-w-xl"
       >
@@ -165,32 +165,32 @@ export default function MasterShift() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
               <FiClock className="text-primary-600" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Shift Attributes</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Atribut Shift</h3>
             </div>
             
             <div className="space-y-4">
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Shift Label / Name <span className="text-red-500 font-bold">*</span></label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Label / Nama Shift <span className="text-red-500 font-bold">*</span></label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none uppercase" 
                   value={formData.nama_shift} 
                   onChange={(e) => setFormData({...formData, nama_shift: e.target.value})} 
-                  placeholder="Ex: MORNING" 
+                  placeholder="Cth: PAGI" 
                 />
               </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Commencement Time</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Waktu Mulai</label>
                   <input type="time" className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" value={formData.jam_mulai} onChange={(e) => setFormData({...formData, jam_mulai: e.target.value})} />
                 </div>
                 <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Conclusion Time</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Waktu Selesai</label>
                   <input type="time" className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-bold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" value={formData.jam_selesai} onChange={(e) => setFormData({...formData, jam_selesai: e.target.value})} />
                 </div>
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Operational State</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status Operasional</label>
                 <select className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all appearance-none cursor-pointer" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
                   <option value="Aktif">Aktif</option>
                   <option value="Non-Aktif">Non-Aktif</option>
@@ -200,13 +200,13 @@ export default function MasterShift() {
           </div>
           
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Batal</button>
             <button 
               className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50" 
               onClick={handleSave} 
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Syncing...' : 'Save Shift Record'}
+              {isSubmitting ? 'Sinkronisasi...' : 'Simpan Data Shift'}
             </button>
           </div>
         </div>

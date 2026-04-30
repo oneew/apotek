@@ -102,11 +102,11 @@ export default function JenisAntrian() {
   };
 
   const columns = [
-    { label: 'Prefix Signature', key: 'kode_prefix', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val || 'N/A'}</span> },
-    { label: 'Queue Domain', key: 'nama_antrian', render: (val) => (
+    { label: 'Prefix Signature', key: 'kode_prefix', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val || '-'}</span> },
+    { label: 'Domain Antrian', key: 'nama_antrian', render: (val) => (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <span className="text-[10px] text-gray-500 font-medium tracking-tight">LOGICAL QUEUE ENTITY</span>
+        <span className="text-[10px] text-gray-500 font-medium tracking-tight">ENTITAS ANTRIAN LOGIS</span>
       </div>
     )},
     { label: 'Status', key: 'status', align: 'center', width: '120px', render: (val) => (
@@ -114,10 +114,10 @@ export default function JenisAntrian() {
         {val}
       </span>
     ) },
-    { label: '', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
+    { label: 'Aksi', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
       <div className="flex gap-1 justify-end">
-        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"><FiEdit2 size={16} /></button>
-        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20"><FiTrash2 size={16} /></button>
+        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" title="Edit"><FiEdit2 size={16} /></button>
+        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20" title="Hapus"><FiTrash2 size={16} /></button>
       </div>
     ) }
   ];
@@ -125,8 +125,8 @@ export default function JenisAntrian() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Queue Protocols" 
-        subtitle="Manage logical queue domains and alphanumeric prefixes for clinic modules."
+        title="Protokol Antrian" 
+        subtitle="Kelola domain antrian logis dan prefix alfanumerik untuk modul klinik."
         icon={<FiUsers size={24} className="text-gray-500" />}
       />
 
@@ -137,16 +137,16 @@ export default function JenisAntrian() {
           isLoading={isLoading}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter queue domains..."
-          primaryAction={{ label: "Add Queue", onClick: () => handleOpenModal() }}
+          searchPlaceholder="Filter domain antrian..."
+          primaryAction={{ label: "Tambah Antrian", onClick: () => handleOpenModal() }}
         />
       </div>
 
       <ModalDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? 'Modify Queue Domain' : 'Queue Registration'}
-        subtitle="Establishing logical domains for patient flow."
+        title={isEditing ? 'Ubah Domain Antrian' : 'Registrasi Antrian'}
+        subtitle="Menetapkan domain logis untuk alur pasien."
         icon={<FiUsers />}
         maxWidth="max-w-xl"
       >
@@ -154,34 +154,34 @@ export default function JenisAntrian() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
               <FiUsers className="text-primary-600" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Queue Attributes</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Atribut Antrian</h3>
             </div>
             
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Terminal Prefix <span className="text-red-500 font-bold">*</span></label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Prefix Terminal <span className="text-red-500 font-bold">*</span></label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none uppercase font-mono" 
                   value={formData.kode_prefix} 
                   onChange={(e) => setFormData({...formData, kode_prefix: e.target.value.toUpperCase()})} 
-                  placeholder="Ex: A" 
+                  placeholder="Cth: A" 
                   maxLength={2} 
                 />
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Queue Label <span className="text-red-500 font-bold">*</span></label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Label Antrian <span className="text-red-500 font-bold">*</span></label>
                 <input 
                   type="text" 
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" 
                   value={formData.nama_antrian} 
                   onChange={(e) => setFormData({...formData, nama_antrian: e.target.value})} 
-                  placeholder="Ex: Poli Umum" 
+                  placeholder="Cth: Poli Umum" 
                 />
               </div>
             </div>
             <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Operational Integrity</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Integritas Operasional</label>
               <select 
                 className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all appearance-none cursor-pointer" 
                 value={formData.status} 
@@ -194,13 +194,13 @@ export default function JenisAntrian() {
           </div>
           
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all" onClick={() => setIsModalOpen(false)}>Batal</button>
             <button 
               className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50" 
               onClick={handleSave} 
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Syncing...' : 'Save Queue Protocol'}
+              {isSubmitting ? 'Sinkronisasi...' : 'Simpan Protokol Antrian'}
             </button>
           </div>
         </div>

@@ -13,6 +13,42 @@ class PenjualanController extends BaseController
     use ResponseTrait;
     protected $format = 'json';
 
+    public function __construct()
+    {
+        $this->_initTable();
+    }
+
+    private function _initTable()
+    {
+        $db = \Config\Database::connect();
+        $db->query("CREATE TABLE IF NOT EXISTS t_penjualan_tertolak (
+            id INTEGER PRIMARY KEY AUTO_INCREMENT,
+            produk_id INTEGER,
+            jumlah INTEGER DEFAULT 1,
+            tanggal DATETIME DEFAULT CURRENT_TIMESTAMP,
+            alasan TEXT,
+            FOREIGN KEY (produk_id) REFERENCES m_produk(id)
+        )");
+    }
+
+    public function log_tertolak()
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data['produk_id'])) {
+            return $this->fail('Product ID required');
+        }
+
+        $db = \Config\Database::connect();
+        $db->table('t_penjualan_tertolak')->insert([
+            'produk_id' => $data['produk_id'],
+            'jumlah'    => $data['jumlah'] ?? 1,
+            'alasan'    => $data['alasan'] ?? 'Stok Habis (Tertolak di Kasir)',
+            'tanggal'   => date('Y-m-d H:i:s')
+        ]);
+
+        return $this->respondCreated(['status' => true, 'message' => 'Penjualan tertolak berhasil dicatat']);
+    }
+
     /**
      * GET /api/master/penjualan
      * List all sales with optional filters
@@ -38,14 +74,26 @@ class PenjualanController extends BaseController
             $builder->where('p.jenis_pembayaran', $paymentType);
         }
 
-        // Filter by date range
-        $dateFrom = $this->request->getGet('date_from');
-        $dateTo   = $this->request->getGet('date_to');
-        if ($dateFrom) {
-            $builder->where('DATE(p.tanggal_penjualan) >=', $dateFrom);
-        }
-        if ($dateTo) {
-            $builder->where('DATE(p.tanggal_penjualan) <=', $dateTo);
+        // Filter by date range or quick filter
+        $filterTanggal = $this->request->getGet('filter_tanggal');
+        $dateFrom      = $this->request->getGet('date_from');
+        $dateTo        = $this->request->getGet('date_to');
+
+        if ($filterTanggal === 'Hari ini') {
+            $builder->where('DATE(p.tanggal_penjualan)', date('Y-m-d'));
+        } elseif ($filterTanggal === 'Minggu ini') {
+            $builder->where('p.tanggal_penjualan >=', date('Y-m-d', strtotime('monday this week')) . ' 00:00:00');
+        } elseif ($filterTanggal === 'Bulan ini') {
+            $builder->where("DATE_FORMAT(p.tanggal_penjualan, '%Y-%m')", date('Y-m'));
+        } elseif ($filterTanggal === 'Tahun ini') {
+            $builder->where("DATE_FORMAT(p.tanggal_penjualan, '%Y')", date('Y'));
+        } else {
+            if ($dateFrom) {
+                $builder->where('DATE(p.tanggal_penjualan) >=', $dateFrom);
+            }
+            if ($dateTo) {
+                $builder->where('DATE(p.tanggal_penjualan) <=', $dateTo);
+            }
         }
 
         // Search
@@ -61,14 +109,18 @@ class PenjualanController extends BaseController
         $data = $builder->orderBy('p.created_at', 'DESC')
             ->get()->getResultArray();
 
-        // Get summary
-        $totalNilai = array_sum(array_column($data, 'total_bayar'));
+        // Get summary (exclude canceled sales from total value)
+        $activeSales = array_filter($data, function($s) { 
+            return $s['status_penjualan'] !== 'Batal'; 
+        });
+        $totalNilai = array_sum(array_column($activeSales, 'total_bayar'));
 
         return $this->respond([
             'status' => true,
             'data'   => $data,
             'summary' => [
                 'total_records' => count($data),
+                'total_active_records' => count($activeSales),
                 'total_nilai'   => (float) $totalNilai,
             ]
         ]);
@@ -83,7 +135,7 @@ class PenjualanController extends BaseController
         $db = \Config\Database::connect();
 
         $penjualan = $db->table('t_penjualan as p')
-            ->select('p.*, pel.nama_pelanggan, pel.no_telp as telp_pelanggan, dok.nama_dokter')
+            ->select('p.*, pel.nama_pelanggan, pel.no_telepon as telp_pelanggan, dok.nama_dokter')
             ->join('m_pelanggan as pel', 'pel.id = p.pelanggan_id', 'left')
             ->join('m_dokter as dok', 'dok.id = p.dokter_id', 'left')
             ->where('p.id', $id)
@@ -137,8 +189,9 @@ class PenjualanController extends BaseController
             'tanggal_penjualan' => date('Y-m-d H:i:s'),
             'pelanggan_id'      => !empty($data['pelanggan_id']) ? $data['pelanggan_id'] : null,
             'dokter_id'         => !empty($data['dokter_id']) ? $data['dokter_id'] : null,
+            'kasir_id'          => $data['kasir_id'] ?? 1,
             'total_belanja'     => $data['subTotal'] ?? 0,
-            'diskon_nota'       => $data['discountTotal'] ?? 0,
+            'diskon_nota'       => ($data['discountTotal'] ?? 0) + ($data['redeemDiscount'] ?? 0),
             'total_bayar'       => $data['grandTotal'] ?? 0,
             'uang_diterima'     => $data['cashAmount'] ?? ($data['grandTotal'] ?? 0),
             'uang_kembali'      => ($data['cashAmount'] ?? ($data['grandTotal'] ?? 0)) - ($data['grandTotal'] ?? 0),
@@ -164,7 +217,42 @@ class PenjualanController extends BaseController
                     'diskon'               => 0,
                     'subtotal'             => ($item['price'] ?? 0) * ($item['qty'] ?? 1),
                 ]);
+
+                // NEW: Auto-log to t_resep if it's a racikan or from external resep
+                if (strpos($item['id'], 'RCK-') !== false || strpos($item['sku'] ?? '', 'MIX-') !== false || !empty($data['dokter_id'])) {
+                    $hasRacikan = true;
+                }
             }
+
+            if (!empty($hasRacikan)) {
+                $resepCount = $db->table('t_resep')->countAllResults() + 1;
+                $noResep = 'RSP-KSR-' . date('Ymd') . '-' . str_pad($resepCount, 4, '0', STR_PAD_LEFT);
+                
+                $db->table('t_resep')->insert([
+                    'no_resep'      => $noResep,
+                    'tanggal_resep' => date('Y-m-d H:i:s'),
+                    'dokter_id'     => !empty($data['dokter_id']) ? $data['dokter_id'] : null,
+                    'pelanggan_id'  => !empty($data['pelanggan_id']) ? $data['pelanggan_id'] : null,
+                    'catatan'       => 'Otomatis dari Penjualan Kasir #' . $penjualanData['no_invoice'],
+                    'status'        => 'Selesai',
+                    'sumber'        => 'Kasir',
+                    'is_racikan'    => true,
+                    'created_at'    => date('Y-m-d H:i:s'),
+                ]);
+            }
+        }
+
+        // 3. Loyalty Points logic
+        if (!empty($data['pelanggan_id'])) {
+            $earnedPoints = floor(($data['grandTotal'] ?? 0) / 10000);
+            $redeemedPoints = $data['redeemPoints'] ?? 0;
+            
+            $db->query("
+                UPDATE m_pelanggan 
+                SET total_belanja = total_belanja + " . ($data['grandTotal'] ?? 0) . ",
+                    loyalty_points = loyalty_points + " . ((int)$earnedPoints - (int)$redeemedPoints) . "
+                WHERE id = " . (int)$data['pelanggan_id'] . "
+            ");
         }
 
         $db->transComplete();
@@ -184,28 +272,187 @@ class PenjualanController extends BaseController
     }
 
     /**
+     * POST /api/master/penjualan/retur
+     * Process item exchange (Tukar Barang)
+     */
+    public function retur()
+    {
+        $data = $this->request->getJSON(true);
+        $db = \Config\Database::connect();
+        
+        $penjualanId = $data['penjualan_id'] ?? null;
+        $detailId    = $data['detail_id'] ?? null; 
+        $replacementProductId = $data['replacement_product_id'] ?? null;
+
+        if (!$penjualanId || !$detailId || !$replacementProductId) {
+            return $this->respond(['status' => false, 'message' => 'Payload tidak lengkap'], 400);
+        }
+
+        // 1. Get original detail
+        $oldDetail = $db->table('t_penjualan_detail')->where('id', $detailId)->get()->getRowArray();
+        if (!$oldDetail) {
+            return $this->respond(['status' => false, 'message' => 'Item asal tidak ditemukan'], 404);
+        }
+
+        // 2. Get products for logging
+        $oldProduct = $db->table('m_produk')->where('id', $oldDetail['produk_id'])->get()->getRowArray();
+        $newProduct = $db->table('m_produk')->where('id', $replacementProductId)->get()->getRowArray();
+
+        if (!$newProduct) {
+            return $this->respond(['status' => false, 'message' => 'Produk pengganti tidak ditemukan'], 404);
+        }
+
+        $db->transStart();
+
+        // A. Return Old Item to Stock
+        if ($oldDetail['stok_batch_id']) {
+            $db->table('t_stok_batch')
+               ->where('id', $oldDetail['stok_batch_id'])
+               ->increment('stok_tersedia', $oldDetail['jumlah_jual']);
+        }
+
+        // B. Deduct New Item from Stock (Using FEFO)
+        $batch = $db->table('t_stok_batch')
+                    ->where('produk_id', $replacementProductId)
+                    ->where('stok_tersedia >', 0)
+                    ->orderBy('tanggal_expired', 'ASC')
+                    ->get()->getRowArray();
+
+        $newBatchId = $batch ? $batch['id'] : null;
+        if ($newBatchId) {
+            $db->table('t_stok_batch')
+               ->where('id', $newBatchId)
+               ->decrement('stok_tersedia', $oldDetail['jumlah_jual']);
+        }
+
+        // C. Update the detail record (Swap Product)
+        $db->table('t_penjualan_detail')
+           ->where('id', $detailId)
+           ->update([
+               'produk_id' => $replacementProductId,
+               'stok_batch_id' => $newBatchId,
+           ]);
+
+        // D. Tag the transaction header
+        $db->table('t_penjualan')
+           ->where('id', $penjualanId)
+           ->update(['status_penjualan' => 'Retur']);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+             return $this->respond(['status' => false, 'message' => 'Gagal memproses tukar barang'], 500);
+        }
+
+        // LOGGING
+        $activityMsg = "Tukar Barang di Invoice #{$penjualanId}: " . ($oldProduct['nama_produk'] ?? 'ID:'.$oldDetail['produk_id']) . " -> " . $newProduct['nama_produk'];
+        $this->logActivity('Penjualan', $activityMsg, $penjualanId, $data);
+
+        return $this->respond([
+            'status' => true, 
+            'message' => 'Tukar barang berhasil diproses'
+        ]);
+    }
+
+    /**
      * DELETE /api/master/penjualan/:id
-     * Cancel/void a sale
+     * Cancel/void a sale and REVERT STOCK
      */
     public function delete($id = null)
     {
         $db = \Config\Database::connect();
-
+        
         $penjualan = $db->table('t_penjualan')->where('id', $id)->get()->getRowArray();
         if (!$penjualan) {
             return $this->respond(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
         }
 
+        if ($penjualan['status_penjualan'] === 'Batal') {
+            return $this->respond(['status' => false, 'message' => 'Transaksi sudah dibatalkan'], 400);
+        }
+
+        $db->transStart();
+
+        // 1. Get all items and revert stock
+        $items = $db->table('t_penjualan_detail')->where('penjualan_id', $id)->get()->getResultArray();
+        foreach ($items as $item) {
+            if ($item['stok_batch_id']) {
+                $db->table('t_stok_batch')
+                    ->where('id', $item['stok_batch_id'])
+                    ->increment('stok_tersedia', $item['jumlah_jual']);
+            }
+        }
+
+        // 2. Update status
         $db->table('t_penjualan')
             ->where('id', $id)
-            ->update(['status_penjualan' => 'Dibatalkan']);
+            ->update(['status_penjualan' => 'Batal']);
 
-        // LOGGING: Record void sale
-        $this->logActivity('Penjualan', 'Transaksi Dibatalkan/Void: ' . $penjualan['no_invoice'], $id);
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return $this->respond(['status' => false, 'message' => 'Gagal membatalkan transaksi'], 500);
+        }
+
+        $this->logActivity('Penjualan', 'Transaksi Dibatalkan/Void (Stock Reverted): ' . $penjualan['no_invoice'], $id);
 
         return $this->respond([
             'status' => true,
-            'message' => 'Penjualan berhasil dibatalkan'
+            'message' => 'Penjualan berhasil dibatalkan dan stok dikembalikan'
+        ]);
+    }
+
+    /**
+     * POST /api/master/penjualan/restore/:id
+     * Undo a void and REDUCT STOCK again
+     */
+    public function restore($id = null)
+    {
+        $db = \Config\Database::connect();
+        
+        $penjualan = $db->table('t_penjualan')->where('id', $id)->get()->getRowArray();
+        if (!$penjualan) {
+            return $this->respond(['status' => false, 'message' => 'Data tidak ditemukan'], 404);
+        }
+
+        if ($penjualan['status_penjualan'] !== 'Batal') {
+            return $this->respond(['status' => false, 'message' => 'Transaksi tidak dalam status Batal'], 400);
+        }
+
+        $db->transStart();
+
+        // 1. Get all items and re-deduct stock
+        $items = $db->table('t_penjualan_detail')->where('penjualan_id', $id)->get()->getResultArray();
+        foreach ($items as $item) {
+            if ($item['stok_batch_id']) {
+                // Check if stock still available before re-deducting
+                $batch = $db->table('t_stok_batch')->where('id', $item['stok_batch_id'])->get()->getRowArray();
+                if (!$batch || $batch['stok_tersedia'] < $item['jumlah_jual']) {
+                    return $this->respond(['status' => false, 'message' => 'Stok tidak mencukupi untuk memulihkan transaksi ini'], 400);
+                }
+
+                $db->table('t_stok_batch')
+                    ->where('id', $item['stok_batch_id'])
+                    ->decrement('stok_tersedia', $item['jumlah_jual']);
+            }
+        }
+
+        // 2. Update status back to Selesai
+        $db->table('t_penjualan')
+            ->where('id', $id)
+            ->update(['status_penjualan' => 'Selesai']);
+
+        $db->transComplete();
+
+        if ($db->transStatus() === false) {
+            return $this->respond(['status' => false, 'message' => 'Gagal memulihkan transaksi'], 500);
+        }
+
+        $this->logActivity('Penjualan', 'Transaksi Dipulihkan (Stock Re-deducted): ' . $penjualan['no_invoice'], $id);
+
+        return $this->respond([
+            'status' => true,
+            'message' => 'Penjualan berhasil dipulihkan'
         ]);
     }
 }

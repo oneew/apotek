@@ -8,7 +8,7 @@ import MainLayout from './layouts/MainLayout';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import PenjualanKasir from './pages/penjualan/kasir';
-import PenjualanPesanan from './pages/penjualan/pesanan';
+
 import PenjualanDaftar from './pages/penjualan/daftar';
 import PenjualanRetur from './pages/penjualan/retur';
 import PenjualanTertolak from './pages/penjualan/tertolak';
@@ -18,9 +18,10 @@ import PelayananKunjungan from './pages/pelayanan/kunjungan';
 import PelayananRekamMedis from './pages/pelayanan/rekam-medis';
 import PelayananPemeriksaanAwal from './pages/pelayanan/pemeriksaan-awal';
 import PelayananPenerimaanResep from './pages/pelayanan/penerimaan-resep';
+import PelayananTemplateRacikan from './pages/pelayanan/template-racikan';
+import PelayananKonseling from './pages/pelayanan/konseling';
 import PelayananPenebusanResep from './pages/pelayanan/penebusan-resep';
 import PelayananSwamedikasi from './pages/pelayanan/swamedikasi';
-import PelayananTemplateRacikan from './pages/pelayanan/template-racikan';
 
 import FormPemeriksaanAwal from './pages/pelayanan/pemeriksaan-awal/baru';
 import FormPenerimaanResep from './pages/pelayanan/penerimaan-resep/baru';
@@ -34,8 +35,9 @@ import PersediaanForecasting from './pages/persediaan/PersediaanForecasting';
 import PersediaanStokKadaluarsa from './pages/persediaan/PersediaanStokKadaluarsa';
 import PersediaanStokOpname from './pages/persediaan/PersediaanStokOpname';
 import PersediaanPenyesuaianStok from './pages/persediaan/PersediaanPenyesuaianStok';
-import PersediaanPerpindahanStok from './pages/persediaan/PersediaanPerpindahanStok';
 
+import PembelianList from './pages/pembelian/list';
+import PembelianSupplier from './pages/pembelian/supplier';
 import PembelianRencana from './pages/pembelian/rencana';
 import PembelianPesanan from './pages/pembelian/pesanan';
 import PembelianFaktur from './pages/pembelian/faktur';
@@ -66,6 +68,7 @@ import KontakSupplier from './pages/kontak/KontakSupplier';
 
 import LaporanPenjualan from './pages/laporan/LaporanPenjualan';
 import LaporanPembelian from './pages/laporan/LaporanPembelian';
+import LaporanSipnap from './pages/laporan/LaporanSipnap';
 import LaporanPersediaan from './pages/laporan/LaporanPersediaan';
 import LaporanKeuangan from './pages/laporan/LaporanKeuangan';
 import LaporanPresensi from './pages/laporan/LaporanPresensi';
@@ -77,14 +80,22 @@ import AnalisisHarga from './pages/analisis/AnalisisHarga';
 import ManajemenDaftarPengguna from './pages/manajemen/ManajemenDaftarPengguna';
 import ManajemenPeran from './pages/manajemen/ManajemenPeran';
 import ManajemenJadwal from './pages/manajemen/ManajemenJadwal';
+import KpiDashboard from './pages/manajemen/KpiDashboard';
 import ManajemenPresensi from './pages/manajemen/ManajemenPresensi';
 import ManajemenShift from './pages/manajemen/ManajemenShift';
 import ManajemenLogAktivitas from './pages/manajemen/ManajemenLogAktivitas';
 import SatusehatSettings from './pages/manajemen/SatusehatSettings';
+import WhatsappGateway from './pages/manajemen/WhatsappGateway';
+import PembelianOcr from './pages/pembelian/PembelianOcr';
+import SecurityMonitor from './pages/manajemen/SecurityMonitor';
 
+import MasterPegawai from './pages/manajemen/MasterPegawai';
 import MasterProduk from './pages/master/MasterProduk';
 import MasterFormula from './pages/master/MasterFormula';
 import MasterKategori from './pages/master/MasterKategori';
+
+import ResepDigital from './pages/klinis/ResepDigital';
+import FefoDashboard from './pages/klinis/FefoDashboard';
 import MasterSatuan from './pages/master/MasterSatuan';
 import MasterRak from './pages/master/MasterRak';
 import MasterGudang from './pages/master/MasterGudang';
@@ -95,6 +106,7 @@ import ProdukLab from './pages/master/ProdukLab';
 import MasterItemPemeriksaan from './pages/master/MasterItemPemeriksaan';
 import MasterPajak from './pages/master/MasterPajak';
 import MasterShift from './pages/master/MasterShift';
+import MasterTemplateCetak from './pages/master/template-cetak';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -109,7 +121,7 @@ function ProtectedRoute({ children }) {
 function PublicRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return null;
-  return isAuthenticated ? <Navigate to="/select-outlet" /> : children;
+  return isAuthenticated ? <Navigate to="/shift" /> : children;
 }
 
 function AppRoutes() {
@@ -126,7 +138,7 @@ function AppRoutes() {
         <Route path="penjualan">
           <Route index element={<Navigate to="kasir" />} />
           <Route path="kasir" element={<PenjualanKasir />} />
-          <Route path="pesanan" element={<PenjualanPesanan />} />
+
           <Route path="daftar" element={<PenjualanDaftar />} />
           <Route path="retur" element={<PenjualanRetur />} />
           <Route path="tertolak" element={<PenjualanTertolak />} />
@@ -141,6 +153,7 @@ function AppRoutes() {
           <Route path="pemeriksaan-lab" element={<ComingSoon title="Pemeriksaan Lab" />} />
           <Route path="penerimaan-resep" element={<PelayananPenerimaanResep />} />
           <Route path="penerimaan-resep/baru" element={<FormPenerimaanResep />} />
+          <Route path="konseling" element={<PelayananKonseling />} />
           <Route path="penebusan-resep" element={<PelayananPenebusanResep />} />
           <Route path="penebusan-resep/baru" element={<FormPenebusanResep />} />
           <Route path="template-racikan" element={<PelayananTemplateRacikan />} />
@@ -156,14 +169,16 @@ function AppRoutes() {
           <Route path="stok-kadaluarsa" element={<PersediaanStokKadaluarsa />} />
           <Route path="stok-opname" element={<PersediaanStokOpname />} />
           <Route path="penyesuaian-stok" element={<PersediaanPenyesuaianStok />} />
-          <Route path="perpindahan-stok" element={<PersediaanPerpindahanStok />} />
         </Route>
         <Route path="pembelian">
-          <Route index element={<Navigate to="rencana" />} />
+          <Route index element={<Navigate to="list" />} />
+          <Route path="list" element={<PembelianList />} />
+          <Route path="supplier" element={<PembelianSupplier />} />
           <Route path="rencana" element={<PembelianRencana />} />
           <Route path="pesanan" element={<PembelianPesanan />} />
           <Route path="faktur" element={<PembelianFaktur />} />
           <Route path="retur" element={<PembelianRetur />} />
+          <Route path="ocr" element={<PembelianOcr />} />
         </Route>
         <Route path="konsinyasi">
           <Route index element={<Navigate to="masuk" />} />
@@ -202,6 +217,7 @@ function AppRoutes() {
         <Route path="laporan">
           <Route index element={<Navigate to="penjualan" />} />
           <Route path="penjualan" element={<LaporanPenjualan />} />
+          <Route path="sipnap" element={<LaporanSipnap />} />
           <Route path="pembelian" element={<LaporanPembelian />} />
           <Route path="persediaan" element={<LaporanPersediaan />} />
           <Route path="keuangan" element={<LaporanKeuangan />} />
@@ -214,9 +230,11 @@ function AppRoutes() {
           <Route path="harga" element={<AnalisisHarga />} />
         </Route>
         <Route path="master">
-          <Route index element={<Navigate to="produk" />} />
+          <Route index element={<Navigate to="pegawai" />} />
+          <Route path="pegawai" element={<MasterPegawai />} />
           <Route path="produk" element={<MasterProduk />} />
           <Route path="formula" element={<MasterFormula />} />
+          <Route path="template-cetak" element={<MasterTemplateCetak />} />
           <Route path="kategori" element={<MasterKategori />} />
           <Route path="satuan" element={<MasterSatuan />} />
           <Route path="rak" element={<MasterRak />} />
@@ -229,15 +247,24 @@ function AppRoutes() {
           <Route path="pajak" element={<MasterPajak />} />
           <Route path="shift" element={<MasterShift />} />
         </Route>
+        <Route path="klinis">
+          <Route index element={<Navigate to="resep-digital" />} />
+          <Route path="resep-digital" element={<ResepDigital />} />
+          <Route path="fefo" element={<FefoDashboard />} />
+        </Route>
         <Route path="manajemen-pengguna">
           <Route index element={<Navigate to="daftar" />} />
           <Route path="daftar" element={<ManajemenDaftarPengguna />} />
+          <Route path="roles" element={<ManajemenPeran />} />
           <Route path="peran" element={<ManajemenPeran />} />
           <Route path="jadwal" element={<ManajemenJadwal />} />
+          <Route path="kpi" element={<KpiDashboard />} />
           <Route path="presensi" element={<ManajemenPresensi />} />
           <Route path="shift" element={<ManajemenShift />} />
           <Route path="log" element={<ManajemenLogAktivitas />} />
           <Route path="satusehat" element={<SatusehatSettings />} />
+          <Route path="security" element={<SecurityMonitor />} />
+          <Route path="whatsapp" element={<WhatsappGateway />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/login" />} />

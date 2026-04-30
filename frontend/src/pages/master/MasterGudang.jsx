@@ -103,23 +103,23 @@ export default function MasterGudang() {
   };
 
   const columns = [
-    { label: 'Warehouse Code', key: 'kode_gudang', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val}</span> },
-    { label: 'Warehouse Name', key: 'nama_gudang', render: (val) => (
+    { label: 'Kode Gudang', key: 'kode_gudang', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val}</span> },
+    { label: 'Nama Gudang', key: 'nama_gudang', render: (val) => (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <span className="text-[10px] text-gray-500 font-medium tracking-tight">PHYSICAL STORAGE FACILITY</span>
+        <span className="text-[10px] text-gray-500 font-medium tracking-tight">FASILITAS PENYIMPANAN FISIK</span>
       </div>
     )},
-    { label: 'Location / Address', key: 'alamat', render: (val) => <span className="text-gray-500 font-medium text-[11px] italic">{val || '-'}</span> },
+    { label: 'Lokasi / Alamat', key: 'alamat', render: (val) => <span className="text-gray-500 font-medium text-[11px] italic">{val || '-'}</span> },
     { label: 'Status', key: 'status', align: 'center', width: '120px', render: (val) => (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${val === 'Aktif' ? 'bg-success-50 text-success-700 border border-success-200' : 'bg-error-50 text-error-700 border border-error-200'}`}>
         {val}
       </span>
     ) },
-    { label: '', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
+    { label: 'Aksi', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
       <div className="flex gap-1 justify-end">
-        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"><FiEdit2 size={16} /></button>
-        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20"><FiTrash2 size={16} /></button>
+        <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-all rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800" title="Edit"><FiEdit2 size={16} /></button>
+        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-error-600 transition-all rounded-lg hover:bg-error-50 dark:hover:bg-error-900/20" title="Hapus"><FiTrash2 size={16} /></button>
       </div>
     ) }
   ];
@@ -127,8 +127,8 @@ export default function MasterGudang() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Physical Warehousing" 
-        subtitle="Manage physical storage locations and pharmaceutical logistics hubs."
+        title="Pergudangan Fisik" 
+        subtitle="Kelola lokasi penyimpanan fisik dan pusat logistik farmasi."
         icon={<FiHome size={24} className="text-gray-500" />}
       />
 
@@ -139,16 +139,16 @@ export default function MasterGudang() {
           isLoading={isLoading}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter warehouse repository..."
-          primaryAction={{ label: "Add Warehouse", onClick: () => handleOpenModal() }}
+          searchPlaceholder="Filter repositori gudang..."
+          primaryAction={{ label: "Tambah Gudang", onClick: () => handleOpenModal() }}
         />
       </div>
 
       <ModalDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={isEditing ? 'Modify Facility Signature' : 'Facility Registration'}
-        subtitle="Ensure logical mapping of physical inventory locations."
+        title={isEditing ? 'Ubah Signature Fasilitas' : 'Registrasi Fasilitas'}
+        subtitle="Memastikan pemetaan logis lokasi inventaris fisik."
         icon={<FiHome />}
         maxWidth="max-w-xl"
       >
@@ -156,25 +156,25 @@ export default function MasterGudang() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
               <FiHome className="text-primary-600" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Facility Attributes</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Atribut Fasilitas</h3>
             </div>
             
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Warehouse Code</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Kode Gudang</label>
                 <input type="text" className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none uppercase font-mono" value={formData.kode_gudang} onChange={(e) => setFormData({...formData, kode_gudang: e.target.value})} placeholder="GDG-01" />
               </div>
               <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Warehouse Name</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Nama Gudang</label>
                 <input type="text" className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" value={formData.nama_gudang} onChange={(e) => setFormData({...formData, nama_gudang: e.target.value})} placeholder="Gudang Utama" />
               </div>
             </div>
             <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Full Address</label>
-              <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none resize-none" value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} placeholder="Location details..." rows="3" />
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Alamat Lengkap</label>
+              <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none resize-none" value={formData.alamat} onChange={(e) => setFormData({...formData, alamat: e.target.value})} placeholder="Detail lokasi..." rows="3" />
             </div>
             <div className="space-y-1.5 focus-within:text-primary-600 transition-colors">
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Operational Status</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status Operasional</label>
               <select className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all appearance-none cursor-pointer" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
                 <option value="Aktif">Aktif</option>
                 <option value="Non-Aktif">Non-Aktif</option>
@@ -183,13 +183,13 @@ export default function MasterGudang() {
           </div>
           
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all">Cancel</button>
+            <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all">Batal</button>
             <button 
               onClick={handleSave} 
               disabled={isSubmitting}
               className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm rounded-lg shadow-sm transition-all active:scale-95 disabled:opacity-50"
             >
-              {isSubmitting ? 'Syncing...' : 'Save Warehouse'}
+              {isSubmitting ? 'Sinkronisasi...' : 'Simpan Gudang'}
             </button>
           </div>
         </div>

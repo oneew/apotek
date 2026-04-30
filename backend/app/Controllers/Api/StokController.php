@@ -83,33 +83,67 @@ class StokController extends ResourceController
         $db->transStart();
 
         foreach ($input['items'] as $item) {
-            // Update specific batch if provided, or create adjustment batch
-            if (!empty($item['batch_id'])) {
-                $batch = $db->table('t_stok_batch')->where('id', $item['batch_id'])->get()->getRow();
-                if ($batch) {
-                    $selisih = $item['stok_fisik'] - $batch->stok_tersedia;
-                    if ($selisih != 0) {
+            $produkId = $item['produk_id'];
+            $stokFisik = (int)$item['stok_fisik'];
+
+            // Get total system stock and batches
+            $batches = $db->table('t_stok_batch')
+                          ->where('produk_id', $produkId)
+                          ->orderBy('tanggal_expired', 'ASC')
+                          ->get()->getResultArray();
+            
+            $stokSistem = 0;
+            foreach ($batches as $b) {
+                $stokSistem += (int)$b['stok_tersedia'];
+            }
+
+            $selisih = $stokFisik - $stokSistem;
+
+            if ($selisih !== 0) {
+                if ($selisih < 0) {
+                    // Stock decrease: Reduce from batches starting from oldest
+                    $deficit = abs($selisih);
+                    foreach ($batches as $batch) {
+                        if ($deficit <= 0) break;
+                        
+                        $available = (int)$batch['stok_tersedia'];
+                        $deduction = min($available, $deficit);
+                        
                         $db->table('t_stok_batch')
-                            ->where('id', $item['batch_id'])
-                            ->update(['stok_tersedia' => $item['stok_fisik']]);
-
-                        // Log to Kartu Stok
-                        $currentTotal = $db->table('t_stok_batch')
-                            ->where('produk_id', $item['produk_id'])
-                            ->selectSum('stok_tersedia')
-                            ->get()->getRow()->stok_tersedia;
-
-                        $db->table('t_kartu_stok')->insert([
-                            'produk_id' => $item['produk_id'],
-                            'tanggal' => date('Y-m-d H:i:s'),
-                            'jenis_mutasi' => $selisih > 0 ? 'Masuk' : 'Keluar',
-                            'jumlah' => abs($selisih),
-                            'sisa_stok' => $currentTotal,
-                            'referensi' => $input['no_opname'] ?? 'OPNAME-' . date('YmdHis'),
-                            'keterangan' => 'Penyesuaian Stok Opname'
+                           ->where('id', $batch['id'])
+                           ->update(['stok_tersedia' => $available - $deduction]);
+                        
+                        $deficit -= $deduction;
+                    }
+                } else {
+                    // Stock increase: Add to the newest batch (furthest expiry)
+                    if (!empty($batches)) {
+                        $newestBatch = end($batches); // last because of ASC sort on expiry
+                        $db->table('t_stok_batch')
+                           ->where('id', $newestBatch['id'])
+                           ->update(['stok_tersedia' => (int)$newestBatch['stok_tersedia'] + $selisih]);
+                    } else {
+                        // Create a generic adjustment batch if no batches exist
+                        $db->table('t_stok_batch')->insert([
+                            'produk_id'       => $produkId,
+                            'no_batch'        => 'OPN-' . date('Ymd'),
+                            'tanggal_expired' => date('Y-m-d', strtotime('+1 year')),
+                            'stok_tersedia'   => $selisih,
+                            'created_at'      => date('Y-m-d H:i:s')
                         ]);
                     }
                 }
+
+                // Log to Kartu Stok
+                $db->table('t_kartu_stok')->insert([
+                    'produk_id'    => $produkId,
+                    'tanggal'      => date('Y-m-d H:i:s'),
+                    'jenis_mutasi' => $selisih > 0 ? 'Masuk' : 'Keluar',
+                    'jumlah'       => abs($selisih),
+                    'sisa_stok'    => $stokFisik,
+                    'referensi'    => $input['no_opname'] ?? 'OPNAME-' . date('YmdHis'),
+                    'keterangan'   => 'Adjustment Stok Opname (Total Inventory Audit)'
+                ]);
             }
         }
 

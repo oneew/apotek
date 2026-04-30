@@ -1,0 +1,10 @@
+Add-Type -AssemblyName System.Drawing
+$img = New-Object System.Drawing.Bitmap(400, 300)
+$graph = [System.Drawing.Graphics]::FromImage($img)
+$graph.Clear([System.Drawing.Color]::White)
+$font = New-Object System.Drawing.Font("Arial", 16)
+$brush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::Black)
+$graph.DrawString("INVOICE NO: INV-777", $font, $brush, 10, 10)
+$graph.DrawString("Tanggal: 25-04-2026", $font, $brush, 10, 40)
+$graph.DrawString("TOTAL Rp 150.000", $font, $brush, 10, 70)
+$img.Save("c:\Users\Administrator\Documents\APP\apotek\fake_invoice.png")

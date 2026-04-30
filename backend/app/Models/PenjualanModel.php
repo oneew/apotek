@@ -11,7 +11,7 @@ class PenjualanModel extends Model
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $allowedFields    = [
-        'no_invoice', 'tanggal_penjualan', 'pelanggan_id', 'dokter_id', 
+        'no_invoice', 'tanggal_penjualan', 'pelanggan_id', 'dokter_id', 'kasir_id', 
         'total_belanja', 'diskon_nota', 'total_bayar', 'uang_diterima', 
         'uang_kembali', 'jenis_pembayaran', 'status_penjualan', 'keterangan'
     ];

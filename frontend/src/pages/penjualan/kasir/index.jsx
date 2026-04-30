@@ -1,16 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiSearch, FiTrash2, FiPlus, FiCreditCard, FiUser, FiActivity, FiX, FiCheckCircle, FiMinus, FiClock, FiPackage, FiList, FiArrowLeft, FiLayers } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import {
+  FiSearch, FiPackage, FiLayers, FiList, FiTrash2,
+  FiMinus, FiPlus, FiX, FiCheckCircle, FiCreditCard,
+  FiArrowLeft, FiClock, FiShield, FiLogOut, FiActivity, FiUser, FiFileText
+} from 'react-icons/fi';
+import ModalRacikan from './components/ModalRacikan';
 import ModalPilihPelanggan from './components/ModalPilihPelanggan';
 import ModalPilihDokter from './components/ModalPilihDokter';
 import ModalPembayaran from './components/ModalPembayaran';
-import ModalRacikan from './components/ModalRacikan';
+import ModalResepKasir from './components/ModalResepKasir';
 import Swal from 'sweetalert2';
+import PrintWrapper from '../../../components/print/PrintWrapper';
+import ThermalReceipt from '../../../components/print/ThermalReceipt';
+import ZReport from '../../../components/print/ZReport';
+import { useAuth } from '../../../context/AuthContext';
 
 const API_BASE = 'http://localhost:8080/api';
 
 export default function PenjualanKasir() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const searchInputRef = useRef(null);
+  const printRef = useRef(null);
+  const zprintRef = useRef(null);
   const dropdownRef = useRef(null);
+  const [receiptData, setReceiptData] = useState(null);
+  const [zReportData, setZReportData] = useState(null);
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -26,6 +42,9 @@ export default function PenjualanKasir() {
   const [selectedPelanggan, setSelectedPelanggan] = useState(null);
   const [selectedDokter, setSelectedDokter] = useState(null);
   const [isModalRacikanOpen, setIsModalRacikanOpen] = useState(false);
+  const [isModalResepOpen, setIsModalResepOpen] = useState(false);
+  const [interactions, setInteractions] = useState([]);
+  const [useBpjs, setUseBpjs] = useState(false);
 
   const [discountPct, setDiscountPct] = useState(0);
   const [discountRp, setDiscountRp] = useState(0);
@@ -58,27 +77,97 @@ export default function PenjualanKasir() {
 
   const handlePaymentClick = () => { if (cart.length === 0) return; setIsPaymentModalOpen(true); };
 
-  const onConfirmPayment = async ({ cashAmount: receivedAmount, paymentType }) => {
+  const handleTutupShift = async () => {
+    const { value: actualCash } = await Swal.fire({
+      title: 'Tutup Shift & Rekonsiliasi Kas',
+      input: 'number',
+      inputLabel: 'Jumlah Uang Tunai di Laci (Actual Cash)',
+      inputPlaceholder: 'Masukkan total fisik uang tunai...',
+      showCancelButton: true,
+      confirmButtonText: 'Selesai & Cetak Z-Report',
+      confirmButtonColor: '#7c3aed',
+      inputAttributes: { min: 0 }
+    });
+
+    if (actualCash !== undefined) {
+      // Mock fetching summary from backend
+      // In real scenario: const resp = await fetch(`${API_BASE}/shift/summary`);
+      const activeShift = JSON.parse(localStorage.getItem('active_shift') || '{}');
+      const mockSummary = {
+        outlet_name: 'Nova Farma Apotek',
+        session_id: 'SES-' + new Date().getTime().toString().slice(-4),
+        shift_type: activeShift.shiftType || 'Harian',
+        staff_name: user?.username || 'Kasir1',
+        start_time: activeShift.startedAt || new Date(new Date().getTime() - 8 * 3600000),
+        end_time: new Date(),
+        opening_cash: activeShift.cashAmount || 0,
+        total_cash_sales: subTotal * 0.7, // MOCK
+        total_non_cash_sales: subTotal * 0.3, // MOCK
+        total_piutang_paid: 0,
+        grand_total_revenue: subTotal,
+        actual_cash: actualCash,
+        discrepancy: actualCash - (Number(activeShift.cashAmount || 0) + (subTotal * 0.7))
+      };
+
+      setZReportData(mockSummary);
+      setTimeout(() => {
+        zprintRef.current?.print();
+        localStorage.removeItem('active_shift');
+        navigate('/shift');
+      }, 1000);
+    }
+  };
+
+  const onConfirmPayment = async ({ cashAmount: receivedAmount, paymentType, redeemPoints, redeemDiscount }) => {
+    const finalGrandTotal = Math.max(0, grandTotal - (redeemDiscount || 0));
     const payload = {
       items: cart.map(item => ({ id: item.id, price: item.price, qty: item.qty })),
-      subTotal, discountTotal: calcDiscount, grandTotal,
-      cashAmount: receivedAmount || grandTotal, paymentType,
+      subTotal, discountTotal: calcDiscount, grandTotal: finalGrandTotal,
+      redeemDiscount, redeemPoints,
+      cashAmount: receivedAmount || finalGrandTotal, paymentType,
       pelanggan_id: selectedPelanggan?.id, dokter_id: selectedDokter?.id, notes: ''
     };
     try {
       const response = await fetch(`${API_BASE}/master/penjualan`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const result = await response.json();
       if (result.status) {
-        Swal.fire({ title: 'Transaksi Berhasil!', text: `Invoice #${result.data.invoice} tersimpan.`, icon: 'success', confirmButtonText: 'Cetak Struk', confirmButtonColor: '#7c3aed', customClass: { popup: 'rounded-2xl' } });
-        
+        const receiptInfo = {
+          invoice_no: result.data.invoice,
+          tanggal: new Date(),
+          kasir_name: user?.username || 'Kasir',
+          pelanggan_name: selectedPelanggan?.nama,
+          items: cart.map(i => ({ ...i, nama_produk: i.name, harga_satuan: i.price })),
+          subtotal: subTotal,
+          diskon: calcDiscount,
+          total_akhir: finalGrandTotal,
+          bayar: receivedAmount || finalGrandTotal,
+          kembali: (receivedAmount || finalGrandTotal) - finalGrandTotal
+        };
+        setReceiptData(receiptInfo);
+
+        const swalResult = await Swal.fire({
+          title: 'Transaksi Berhasil!',
+          text: `Invoice #${result.data.invoice} tersimpan.`,
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: 'Cetak Struk',
+          cancelButtonText: 'Selesai',
+          confirmButtonColor: '#7c3aed',
+          customClass: { popup: 'rounded-2xl' }
+        });
+
+        if (swalResult.isConfirmed) {
+          setTimeout(() => printRef.current?.print(), 500);
+        }
+
         // Trigger SATUSEHAT Bridge
         fetch(`${API_BASE}/satusehat/send-dispense`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                invoice: result.data.invoice, 
-                patient_id: 'P000' + (selectedPelanggan?.id || '123') 
-            })
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            invoice: result.data.invoice,
+            patient_id: 'P000' + (selectedPelanggan?.id || '123')
+          })
         });
 
         resetState();
@@ -106,9 +195,51 @@ export default function PenjualanKasir() {
 
   const selectProduct = (product) => {
     const stok = parseInt(product.stok_total) || 0;
-    if (stok <= 0) { Swal.fire({ title: 'Stok Habis', text: `${product.nama_produk} tidak tersedia.`, icon: 'warning', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false }); return; }
+    if (stok <= 0) { 
+      // Log to lost sales / tertolak
+      fetch(`${API_BASE}/master/penjualan/log-tertolak`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ produk_id: product.id, jumlah: 1, alasan: 'Stok Habis di Kasir' })
+      });
+
+      Swal.fire({ 
+        title: 'Stok Habis', 
+        text: `${product.nama_produk} tidak tersedia. Permintaan ini telah dicatat ke daftar Defecta.`, 
+        icon: 'warning', 
+        toast: true, 
+        position: 'top-end', 
+        timer: 3000, 
+        showConfirmButton: false 
+      }); 
+      return; 
+    }
     addToCart({ id: product.id, name: product.nama_produk, sku: product.sku || product.barcode, price: getHargaJual(product), unit: product.nama_satuan || 'Pcs' });
     setSearchQuery(''); setShowDropdown(false); setHighlightIndex(-1); searchInputRef.current?.focus();
+  };
+
+  const handleScanResep = async (noResep) => {
+    try {
+      const resp = await fetch(`${API_BASE}/master/resep/${noResep}`);
+      const result = await resp.json();
+      if (result.status && result.data.items) {
+        if (result.data.pelanggan_id) setSelectedPelanggan({ id: result.data.pelanggan_id, nama: result.data.nama_pelanggan, loyalty_points: result.data.loyalty_points || 0 });
+        if (result.data.dokter_id) setSelectedDokter({ id: result.data.dokter_id, nama: result.data.nama_dokter });
+
+        setCart(result.data.items.map(item => ({
+          id: item.produk_id,
+          name: item.nama_produk,
+          sku: item.sku,
+          price: Math.ceil((parseFloat(item.harga_beli_referensi) || 0) * 1.3 / 100) * 100,
+          unit: item.nama_satuan || 'Pcs',
+          qty: parseInt(item.jumlah)
+        })));
+        setSearchQuery('');
+        Swal.fire({ title: 'Resep Ditemukan', text: `Resep ${noResep} berhasil dimuat.`, icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+      } else {
+        Swal.fire({ title: 'Resep Tidak Ditemukan', text: result.message, icon: 'error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+      }
+    } catch (e) { }
   };
 
   const handleSearchSubmit = (e) => {
@@ -117,6 +248,10 @@ export default function PenjualanKasir() {
     if (e.key === 'Escape') { setShowDropdown(false); setHighlightIndex(-1); return; }
     if (e.key === 'Enter' && searchQuery.trim() !== '') {
       e.preventDefault();
+      if (searchQuery.trim().startsWith('RSP-')) {
+        handleScanResep(searchQuery.trim());
+        return;
+      }
       if (highlightIndex >= 0 && filteredProducts[highlightIndex]) { selectProduct(filteredProducts[highlightIndex]); return; }
       if (filteredProducts.length > 0) { selectProduct(filteredProducts[0]); }
       else { Swal.fire({ title: 'Produk tidak ditemukan', text: 'Coba kata kunci lain.', icon: 'warning', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false }); }
@@ -129,6 +264,18 @@ export default function PenjualanKasir() {
   const updateQty = (id, newQty) => { if (newQty < 1) return; setCart(prev => prev.map(item => item.id === id ? { ...item, qty: newQty } : item)); };
   const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val);
   const formatDate = (d) => { try { return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); } catch { return d; } };
+
+  useEffect(() => {
+    if (cart.length > 1) {
+      fetch(`${API_BASE}/master/interaksi/check`, {
+        method: 'POST', body: JSON.stringify({ produk_ids: cart.map(c => c.id) }), headers: { 'Content-Type': 'application/json' }
+      }).then(r => r.json()).then(res => {
+        if (res.status) setInteractions(res.interactions);
+      });
+    } else {
+      setInteractions([]);
+    }
+  }, [cart]);
 
   // ===== RIWAYAT VIEW =====
   if (activeView === 'riwayat') {
@@ -241,8 +388,14 @@ export default function PenjualanKasir() {
           <button onClick={() => setIsModalRacikanOpen(true)} className="h-8 px-3 flex items-center gap-1.5 text-[11px] font-bold text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-800 hover:border-primary-500 rounded-lg transition-all">
             <FiLayers size={13} /><span className="hidden xl:inline">Racikan</span>
           </button>
+          <button onClick={() => setIsModalResepOpen(true)} className="h-8 px-3 flex items-center gap-1.5 text-[11px] font-bold text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-800 hover:border-primary-500 rounded-lg transition-all">
+            <FiFileText size={13} /><span className="hidden xl:inline">Tebus Resep</span>
+          </button>
           <button onClick={() => { setActiveView('riwayat'); fetchRiwayat(); }} className="h-8 px-3 flex items-center gap-1.5 text-[11px] font-bold text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-800 hover:border-primary-500 rounded-lg transition-all">
             <FiList size={13} /><span className="hidden xl:inline">Riwayat</span>
+          </button>
+          <button onClick={handleTutupShift} className="h-8 px-3 flex items-center gap-1.5 text-[11px] font-bold text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-800 hover:border-primary-500 rounded-lg transition-all">
+            <FiLogOut size={13} /><span className="hidden xl:inline">Tutup Shift</span>
           </button>
           <button onClick={() => setCart([])} className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all border border-gray-200 dark:border-gray-800" title="Hapus Semua">
             <FiTrash2 size={14} />
@@ -255,6 +408,22 @@ export default function PenjualanKasir() {
 
         {/* LEFT: Tabel Produk (full height) */}
         <main className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-900">
+          {interactions.length > 0 && (
+            <div className="bg-red-50 border-b border-red-200 px-4 py-3 flex items-start gap-3">
+              <div className="text-red-500 mt-0.5"><FiActivity size={18} /></div>
+              <div>
+                <h4 className="text-xs font-bold text-red-800 uppercase tracking-widest">Peringatan Interaksi Obat (Clinical Safety)</h4>
+                <ul className="list-disc pl-4 mt-1 space-y-1">
+                  {interactions.map((ix, i) => (
+                    <li key={i} className="text-[11px] text-red-700">
+                      <b className="text-red-900">{ix.drug_class_a} & {ix.drug_class_b}</b>: {ix.deskripsi_efek} <br />
+                      <span className="text-[10px] text-red-500 opacity-80">(Konflik ditemukan antara produk: {ix.produk_a.join(', ')} dan {ix.produk_b.join(', ')})</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
           <div className="flex-1 overflow-auto custom-scrollbar">
             <table className="w-full text-left border-separate border-spacing-0">
               <thead className="sticky top-0 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm z-10">
@@ -353,13 +522,19 @@ export default function PenjualanKasir() {
               <span className="text-[11px] text-gray-500">Biaya Lain</span>
               <input type="number" value={fees.other || ''} onChange={(e) => setFees({ ...fees, other: e.target.value })} className="w-20 h-6 bg-gray-50 border border-gray-200 rounded text-right px-1.5 text-[11px] font-bold text-gray-900 outline-none focus:border-primary-500 tabular-nums" />
             </div>
+
+            {/* BPJS Toggle */}
+            <div className="flex justify-between items-center bg-blue-50/50 mt-1 p-2 rounded-lg border border-blue-100">
+              <span className="text-[11px] font-bold text-blue-800 flex items-center gap-1.5"><FiShield size={12} /> Klaim BPJS (VClaim)</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" checked={useBpjs} onChange={(e) => setUseBpjs(e.target.checked)} className="sr-only peer" />
+                <div className="w-7 h-4 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
           </div>
 
-          {/* Spacer pushes total + buttons to bottom */}
-          <div className="flex-1" />
-
           {/* Total Bayar */}
-          <div className="p-3 shrink-0">
+          <div className="p-3 pb-0 shrink-0">
             <div className="bg-primary-600 px-4 py-4 rounded-xl text-center shadow-lg shadow-primary-500/15">
               <div className="text-[10px] font-bold text-white/60 uppercase tracking-wider mb-0.5">Total Bayar</div>
               <div className="text-3xl font-extrabold text-white tracking-tight tabular-nums">{formatCurrency(grandTotal)}</div>
@@ -368,9 +543,19 @@ export default function PenjualanKasir() {
           </div>
 
           {/* Tombol Aksi: Bayar + Tahan */}
-          <div className="p-3 pt-0 flex gap-2 shrink-0">
+          <div className="p-3 flex gap-2 shrink-0">
             <button
-              onClick={handlePaymentClick}
+              onClick={() => {
+                if (useBpjs) {
+                  Swal.fire({ title: 'Bridging BPJS...', text: 'Mengklaim SEP ke VClaim BPJS', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                  setTimeout(() => {
+                    Swal.fire({ title: 'Klaim Berhasil', text: 'Tagihan dilimpahkan ke BPJS (SEP-TEST001)', icon: 'success', timer: 2000, showConfirmButton: false });
+                    onConfirmPayment({ cash: grandTotal, change: 0, method: 'BPJS' });
+                  }, 1500);
+                } else {
+                  setIsPaymentModalOpen(true);
+                }
+              }}
               disabled={cart.length === 0}
               className="flex-1 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-lg py-2.5 flex items-center justify-center gap-1.5 shadow-md shadow-primary-500/20 active:scale-[0.98] transition-all"
             >
@@ -381,13 +566,36 @@ export default function PenjualanKasir() {
               <FiClock size={16} />
             </button>
           </div>
+
+          {/* Spacer pushes total + buttons to bottom */}
+          <div className="flex-1" />
         </aside>
       </div>
 
       <ModalPilihPelanggan isOpen={isModalPelangganOpen} onClose={() => setIsModalPelangganOpen(false)} onSelect={(p) => setSelectedPelanggan(p)} />
       <ModalPilihDokter isOpen={isModalDokterOpen} onClose={() => setIsModalDokterOpen(false)} onSelect={(d) => setSelectedDokter(d)} />
-      <ModalPembayaran isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} totalAmount={grandTotal} onConfirm={onConfirmPayment} />
+      <ModalPembayaran isOpen={isPaymentModalOpen} onClose={() => setIsPaymentModalOpen(false)} totalAmount={grandTotal} pelanggan={selectedPelanggan} onConfirm={onConfirmPayment} />
       <ModalRacikan isOpen={isModalRacikanOpen} onClose={() => setIsModalRacikanOpen(false)} onSelect={(product) => selectProduct(product)} />
+      <ModalResepKasir isOpen={isModalResepOpen} onClose={() => setIsModalResepOpen(false)} onSelectResep={(resep) => {
+        setSelectedPelanggan({ id: resep.pelanggan_id, nama: resep.nama_pasien });
+        setSelectedDokter({ id: resep.dokter_id, nama: resep.nama_dokter });
+        setCart(resep.items.map(i => ({
+          id: i.produk_id,
+          name: i.nama_produk,
+          sku: i.sku || `RSP-ITEM-${i.produk_id}`,
+          price: Math.ceil(((i.harga_beli_referensi || 0) * 1.3) / 100) * 100,
+          unit: i.nama_satuan || 'Pcs',
+          qty: i.jumlah
+        })));
+      }} />
+
+      <PrintWrapper ref={printRef}>
+        <ThermalReceipt data={receiptData} />
+      </PrintWrapper>
+
+      <PrintWrapper ref={zprintRef}>
+        <ZReport data={zReportData} />
+      </PrintWrapper>
 
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }

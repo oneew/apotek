@@ -94,7 +94,7 @@ export default function ManajemenLogAktivitas() {
           isLoading={isLoading}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Search audit trail..."
+          searchPlaceholder="Cari riwayat aktivitas..."
         />
       </div>
 

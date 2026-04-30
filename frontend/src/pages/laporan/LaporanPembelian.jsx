@@ -28,7 +28,7 @@ export default function LaporanPembelian() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader title="Laporan Pembelian" subtitle="Ringkasan transaksi pembelian dari supplier."
+      <PageHeader showPrint={true} title="Laporan Pembelian" subtitle="Ringkasan transaksi pembelian dari supplier."
         breadcrumbs={[{ label: 'Laporan', path: '/laporan' }, { label: 'Pembelian' }]} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">

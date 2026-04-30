@@ -2,7 +2,7 @@
  * SectionHeader — Untitled UI Standard
  * Supports title, subtitle, icon, and actions (children)
  */
-export default function SectionHeader({ title, subtitle, icon, children }) {
+export default function SectionHeader({ title, subtitle, icon, showPrint, children }) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 mt-8 first:mt-0">
       <div className="flex items-center gap-4">
@@ -19,11 +19,14 @@ export default function SectionHeader({ title, subtitle, icon, children }) {
           {subtitle && <p className="text-xs text-gray-500 dark:text-gray-400 font-medium italic tracking-tight">{subtitle}</p>}
         </div>
       </div>
-      {children && (
-        <div className="flex items-center gap-2">
-          {children}
-        </div>
-      )}
+      <div className="flex flex-wrap items-center gap-2">
+        {showPrint && (
+          <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg text-sm font-bold transition-all shadow-sm border border-gray-200 dark:border-gray-700">
+            <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="15" width="15" xmlns="http://www.w3.org/2000/svg"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> Cetak Laporan
+          </button>
+        )}
+        {children}
+      </div>
     </div>
   );
 }

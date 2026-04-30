@@ -7,7 +7,7 @@ import StatusCard from '../../components/ui/StatusCard';
 import SectionHeader, { DateFilter } from '../../components/ui/SectionHeader';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = '/api';
 
 export default function DashboardUmum() {
   const [data, setData] = useState(null);
@@ -23,7 +23,7 @@ export default function DashboardUmum() {
 
   const formatCurrency = (val) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(val || 0);
 
-  const salesChart = data?.sales_chart || Array.from({ length: 7 }, (_, i) => ({ name: `${i+1}`, total: 0, frekuensi: 0 }));
+  const salesChart = data?.sales_chart || Array.from({ length: 7 }, (_, i) => ({ name: `${i + 1}`, total: 0, frekuensi: 0 }));
 
   const todayStr = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 
@@ -44,15 +44,15 @@ export default function DashboardUmum() {
           label="Total Penjualan Hari Ini"
           value={loading ? '...' : formatCurrency(data?.sales?.today_total)}
           icon={FiDollarSign}
-          iconBg="bg-green-100 dark:bg-green-900/30"
-          iconColor="text-green-600 dark:text-green-400"
+          iconBg="bg-purple-100 dark:bg-purple-900/30"
+          iconColor="text-purple-600 dark:text-purple-400"
         />
         <DashboardCard
           label="Transaksi Hari Ini"
           value={loading ? '...' : `${data?.sales?.today_count || 0} trx`}
           icon={FiDollarSign}
-          iconBg="bg-blue-100 dark:bg-blue-900/30"
-          iconColor="text-blue-600 dark:text-blue-400"
+          iconBg="bg-purple-100 dark:bg-purple-900/30"
+          iconColor="text-purple-600 dark:text-purple-400"
         />
         <DashboardCard
           label="Penjualan Bulan Ini"
@@ -73,7 +73,7 @@ export default function DashboardUmum() {
               <BarChart data={salesChart} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border-base)" />
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#98a2b3' }} />
-                <YAxis tick={{ fontSize: 10, fill: '#98a2b3' }} tickFormatter={v => `${(v/1000).toFixed(0)}k`} />
+                <YAxis tick={{ fontSize: 10, fill: '#98a2b3' }} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(val) => formatCurrency(val)} />
                 <Bar dataKey="total" name="Penjualan" fill="#B19CD9" radius={[3, 3, 0, 0]} />
               </BarChart>
@@ -88,7 +88,7 @@ export default function DashboardUmum() {
                 <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#98a2b3' }} />
                 <YAxis tick={{ fontSize: 10, fill: '#98a2b3' }} />
                 <Tooltip />
-                <Bar dataKey="frekuensi" name="Transaksi" fill="#60a5fa" radius={[3, 3, 0, 0]} />
+                <Bar dataKey="frekuensi" name="Transaksi" fill="#B19CD9" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -103,22 +103,22 @@ export default function DashboardUmum() {
           label="Database Pelanggan"
           value={loading ? '...' : (data?.counts?.pelanggan || 0)}
           icon={FiUsers}
-          iconBg="bg-teal-100 dark:bg-teal-900/30"
-          iconColor="text-teal-600 dark:text-teal-400"
+          iconBg="bg-purple-100 dark:bg-purple-900/30"
+          iconColor="text-purple-600 dark:text-purple-400"
         />
         <DashboardCard
           label="Database Supplier"
           value={loading ? '...' : (data?.counts?.supplier || 0)}
           icon={FiTruck}
-          iconBg="bg-red-100 dark:bg-red-900/30"
-          iconColor="text-red-500 dark:text-red-400"
+          iconBg="bg-purple-100 dark:bg-purple-900/30"
+          iconColor="text-purple-600 dark:text-purple-400"
         />
         <DashboardCard
           label="Database Produk"
           value={loading ? '...' : (data?.counts?.produk || 0)}
           icon={FiPackage}
-          iconBg="bg-blue-100 dark:bg-blue-900/30"
-          iconColor="text-blue-600 dark:text-blue-400"
+          iconBg="bg-purple-100 dark:bg-purple-900/30"
+          iconColor="text-purple-600 dark:text-purple-400"
         />
         <DashboardCard
           label="Database Dokter"
@@ -137,13 +137,13 @@ export default function DashboardUmum() {
           title="Stok Rendah"
           value={loading ? 0 : (data?.stock?.rendah || 0)}
           unit="produk"
-          color="orange"
+          color="purple"
         />
         <StatusCard
           title="Stok Habis"
           value={loading ? 0 : (data?.stock?.habis || 0)}
           unit="produk"
-          color="red"
+          color="purple"
         />
         <StatusCard
           title="Dekat Kadaluarsa"
@@ -155,7 +155,7 @@ export default function DashboardUmum() {
           title="Sudah Kadaluarsa"
           value={loading ? 0 : (data?.stock?.sudah_expired || 0)}
           unit="batch"
-          color="red"
+          color="purple"
         />
       </div>
     </div>

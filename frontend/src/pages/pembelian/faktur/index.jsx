@@ -60,6 +60,20 @@ export default function PembelianFaktur() {
       label: 'Vendor / Provider', 
       render: (val) => <span className="text-gray-700 dark:text-gray-300 font-semibold text-xs tracking-tight">{val}</span> 
     },
+    {
+      key: 'tanggal_jatuh_tempo',
+      label: 'Jatuh Tempo',
+      render: (val) => {
+        if (!val) return <span className="text-gray-300 italic text-[10px]">No Deadline</span>;
+        const d = new Date(val);
+        const isOverdue = d < new Date() && d.toDateString() !== new Date().toDateString();
+        return (
+          <span className={`font-bold text-[11px] ${isOverdue ? 'text-red-500' : 'text-gray-600'}`}>
+            {d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </span>
+        );
+      }
+    },
     { 
       key: 'grand_total', 
       label: 'Total Liability',
@@ -90,10 +104,10 @@ export default function PembelianFaktur() {
       render: (val) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-tight ${
           val === 'Lunas' 
-          ? 'bg-primary-50 text-primary-700 border border-primary-200' 
-          : 'bg-error-50 text-error-700 border border-error-200'
+          ? 'bg-green-50 text-green-700 border border-green-200' 
+          : 'bg-amber-50 text-amber-700 border border-amber-200'
         }`}>
-          {val || 'Outstanding'}
+          {val || 'Belum Lunas'}
         </span>
       )
     },
@@ -122,9 +136,9 @@ export default function PembelianFaktur() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-12 px-4">
       <SectionHeader 
-        title="Purchase Invoices" 
-        subtitle="Manage acquisition receipts, vendor settlement, and inventory synchronization."
-        icon={<FiFileText size={24} className="text-gray-400" />}
+        title="Daftar Pembelian (Rekap Faktur)" 
+        subtitle="Manajemen penerimaan barang, status pembayaran faktur, dan sinkronisasi stok."
+        icon={<FiFileText size={24} className="text-primary-500" />}
       >
           <div className="flex gap-2">
             <button 

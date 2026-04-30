@@ -75,8 +75,8 @@ export default function MasterProduk() {
     if (!formData.nama_produk) {
       Swal.fire({
         icon: 'warning',
-        title: 'Validation Failed',
-        text: 'Product name is required for registration.',
+        title: 'Validasi Gagal',
+        text: 'Nama produk harus diisi.',
         confirmButtonColor: '#7F56D9'
       });
       return;
@@ -84,8 +84,9 @@ export default function MasterProduk() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:8080/api/produk', {
-        method: 'POST',
+      const url = isEditing ? `http://localhost:8080/api/produk/${formData.id}` : 'http://localhost:8080/api/produk';
+      const response = await fetch(url, {
+        method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
@@ -94,8 +95,8 @@ export default function MasterProduk() {
       if (response.ok && result.status) {
         Swal.fire({
           icon: 'success',
-          title: 'Success',
-          text: result.message || 'Product catalog updated successfully.',
+          title: 'Berhasil',
+          text: result.message || 'Data produk berhasil disimpan.',
           timer: 2000,
           showConfirmButton: false,
           customClass: { popup: 'rounded-xl' }
@@ -105,64 +106,101 @@ export default function MasterProduk() {
       } else {
         Swal.fire({
           icon: 'error',
-          title: 'Update Failed',
-          text: result.message || 'Please check your inputs and try again.',
+          title: 'Gagal',
+          text: result.message || 'Terjadi kesalahan saat menyimpan data.',
           confirmButtonColor: '#D92D20'
         });
       }
     } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'Network Error',
-        text: 'System could not reach API gateway.'
+        title: 'Kesalahan Jaringan',
+        text: 'Sistem tidak dapat terhubung ke server.'
       });
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: 'Apakah anda yakin?',
+      text: "Data produk ini akan dihapus permanen!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#7F56D9',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`http://localhost:8080/api/produk/${id}`, { method: 'DELETE' });
+        const res = await response.json();
+        if (res.status) {
+          Swal.fire('Terhapus!', 'Produk telah dihapus.', 'success');
+          fetchProducts();
+        }
+      } catch (err) {
+        Swal.fire('Gagal!', 'Terjadi kesalahan jaringan.', 'error');
+      }
+    }
+  };
+
+  const handleOpenEdit = (item) => {
+    setIsEditing(true);
+    setFormData({ ...item });
+    setIsModalOpen(true);
+  };
+
   const columns = [
     { label: 'SKU / Identifier', key: 'sku', width: '150px', render: (val) => <span className="font-semibold text-primary-700">{val}</span> },
-    { label: 'Product Signature', key: 'nama_produk', render: (val) => (
+    { label: 'Identitas Produk', key: 'nama_produk', render: (val) => (
       <div className="flex flex-col">
         <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <span className="text-[10px] text-gray-500 font-medium tracking-tight">PHARMACEUTICAL ASSET</span>
+        <span className="text-[10px] text-gray-500 font-medium tracking-tight">DATA PRODUK APOTEK</span>
       </div>
     )},
-    { label: 'Classification', key: 'nama_kategori', render: (val, item) => (
+    { label: 'Klasifikasi', key: 'nama_kategori', render: (val, item) => (
       <div className="flex flex-col">
         <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400">{val || '-'}</span>
         {item.kfa_code && <span className="text-[9px] text-success-600 font-bold uppercase tracking-widest mt-0.5">KFA: {item.kfa_code}</span>}
       </div>
     )},
     { 
-      label: 'Acquisition Price', 
+      label: 'Harga Beli', 
       key: 'harga_beli_referensi', 
       align: 'right',
       render: (val) => <span className="font-semibold text-gray-900 dark:text-gray-100 tabular-nums">Rp {new Intl.NumberFormat('id-ID').format(val)}</span> 
     },
     { 
-      label: 'Unit', 
+      label: 'Satuan', 
       key: 'nama_satuan',
       align: 'center',
       width: '100px',
       render: (val) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">{val || '-'}</span>
     },
     { 
-      label: 'Market State', 
+      label: 'Status', 
       key: 'is_dijual', 
       align: 'center',
       width: '120px',
       render: (val) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${val === 'ya' ? 'bg-success-50 text-success-700 border border-success-200' : 'bg-error-50 text-error-700 border border-error-200'}`}>
-          {val === 'ya' ? 'Active' : 'Archived'}
+          {val === 'ya' ? 'Aktif' : 'Non-Aktif'}
         </span>
       ) 
     },
-    { label: '', key: 'aksi', align: 'right', width: '80px', render: (_, item) => (
-      <button onClick={() => handleOpenModal(item)} className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all">
-        <FiEdit2 size={16} />
-      </button>
+    { label: 'Aksi', key: 'aksi', align: 'right', width: '120px', render: (_, item) => (
+      <div className="flex justify-end gap-2">
+        <button onClick={() => handleOpenEdit(item)} className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Edit">
+          <FiEdit2 size={16} />
+        </button>
+        <button onClick={() => handleDelete(item.id)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all" title="Hapus">
+          <FiTrash2 size={16} />
+        </button>
+      </div>
     ) }
   ];
 
@@ -177,7 +215,7 @@ export default function MasterProduk() {
             rak_penyimpanan: '1', katalog_online: 'Tampilkan',
             zat_aktif: '', bentuk_sediaan: '', indikasi_utama: '', catatan_lainnya: '',
             kategori_1_id: '1', pajak: 'PPN', nie: '',
-            kfa_code: '', kfa_name: ''
+            kfa_code: '', kfa_name: '', drug_class: '-'
         });
         setSatuanLainnya([]);
     }
@@ -186,8 +224,8 @@ export default function MasterProduk() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Product Inventory" 
-        subtitle="Manage and regulate pharmaceutical products and catalog assets."
+        title="Daftar Produk" 
+        subtitle="Kelola dan atur daftar obat serta aset barang farmasi."
         icon={<FiBox size={24} className="text-gray-500" />}
       />
 
@@ -198,9 +236,9 @@ export default function MasterProduk() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           isLoading={isLoading}
-          searchPlaceholder="Search by name, SKU or barcode..."
+          searchPlaceholder="Cari produk, SKU atau barcode..."
           primaryAction={{
-            label: "Add Product",
+            label: "Tambah Produk",
             onClick: () => handleOpenModal(false)
           }}
         />
@@ -238,14 +276,30 @@ export default function MasterProduk() {
                 </div>
               </div>
 
-              <div className="col-span-12 lg:col-span-8 grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
+              <div className="col-span-12 lg:col-span-8 grid grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-1.5 lg:col-span-1">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Product Name</label>
                   <input type="text" name="nama_produk" value={formData.nama_produk} onChange={handleInputChange} className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" placeholder="e.g. Paracetamol 500mg" />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 lg:col-span-1">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Manufacturer</label>
                   <input type="text" name="pabrik_prinsipal" value={formData.pabrik_prinsipal} onChange={handleInputChange} className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none" placeholder="e.g. Kimia Farma" />
+                </div>
+                <div className="space-y-1.5 lg:col-span-1">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Drug Class (Interaction Safety)</label>
+                  <select name="drug_class" value={formData.drug_class || '-'} onChange={handleInputChange} className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none">
+                    <option value="-">- Bukan Obat Spesifik -</option>
+                    <option value="NSAID">NSAID (Painkillers)</option>
+                    <option value="Antikoagulan">Antikoagulan (Pengencer Darah)</option>
+                    <option value="ACE Inhibitor">ACE Inhibitor (Darah Tinggi)</option>
+                    <option value="Potassium-sparing Diuretics">Diuretik Hemat Kalium</option>
+                    <option value="Beta Blocker">Beta Blocker (Jantung)</option>
+                    <option value="Calcium Channel Blocker">Calcium Channel Blocker</option>
+                    <option value="Statin">Statin (Kolesterol)</option>
+                    <option value="Makrolida">Makrolida (Antibiotik)</option>
+                    <option value="Antasida">Antasida (Lambung)</option>
+                    <option value="Tetrasiklin">Tetrasiklin (Antibiotik)</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -404,7 +458,7 @@ export default function MasterProduk() {
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-800">
-            <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all">Cancel</button>
+            <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-all">Batal</button>
             <button 
               onClick={handleSubmit} 
               disabled={isSubmitting}

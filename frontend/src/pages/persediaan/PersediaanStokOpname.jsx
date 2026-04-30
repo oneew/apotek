@@ -29,51 +29,36 @@ export default function PersediaanStokOpname() {
   };
 
   const addProductToOpname = async (product) => {
-    try {
-      const resp = await fetch(`http://localhost:8080/api/master/stok/detail/${product.id}`);
-      const res = await resp.json();
-      if (res.status && res.data.length > 0) {
-        const newItems = res.data.map(b => ({
-          ...b,
-          nama_produk: product.nama_produk,
-          sku: product.sku,
-          stok_sistem: b.stok_tersedia,
-          stok_fisik: b.stok_tersedia,
-          batch_id: b.id
-        }));
-        
-        const filtered = newItems.filter(ni => !items.some(i => i.batch_id === ni.batch_id));
-        if (filtered.length === 0) {
-          Swal.fire({
-            icon: 'info',
-            title: 'Batch Already Exists',
-            text: 'All selected product batches are already present in the audit list.',
-            confirmButtonColor: '#7F56D9'
-          });
-          return;
-        }
-        setItems([...items, ...filtered]);
-      } else {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Stock Not Found',
-          text: 'This product has no active batches or stock in the system.',
-          confirmButtonColor: '#7F56D9'
-        });
-      }
-    } catch (err) {
-      console.error(err);
+    // Check if product already in list
+    if (items.some(i => i.produk_id === product.id)) {
+      Swal.fire({
+        icon: 'info',
+        title: 'Product Already Added',
+        text: 'This product is already in the audit list.',
+        confirmButtonColor: '#7F56D9'
+      });
+      return;
     }
+
+    const newItem = {
+      produk_id: product.id,
+      nama_produk: product.nama_produk,
+      sku: product.sku,
+      stok_sistem: product.stok_total,
+      stok_fisik: product.stok_total
+    };
+    
+    setItems([...items, newItem]);
     setSearchQuery('');
     setSearchResults([]);
   };
 
-  const updateStokFisik = (batchId, val) => {
-    setItems(items.map(item => item.batch_id === batchId ? { ...item, stok_fisik: parseFloat(val) || 0 } : item));
+  const updateStokFisik = (produkId, val) => {
+    setItems(items.map(item => item.produk_id === produkId ? { ...item, stok_fisik: parseFloat(val) || 0 } : item));
   };
 
-  const removeItem = (batchId) => {
-    setItems(items.filter(i => i.batch_id !== batchId));
+  const removeItem = (produkId) => {
+    setItems(items.filter(i => i.produk_id !== produkId));
   };
 
   const handleSubmit = async () => {
@@ -120,13 +105,13 @@ export default function PersediaanStokOpname() {
   };
 
   const columns = [
-    { label: 'Batch Signature', key: 'nama_produk', render: (val, row) => (
-      <div className="flex flex-col py-0.5">
-        <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[10px] text-primary-600 font-bold uppercase">Batch: {row.no_batch}</span>
-          <span className="w-1 h-1 rounded-full bg-gray-300" />
-          <span className="text-[10px] text-gray-400 font-medium">EXP: {row.tanggal_expired}</span>
+    { label: 'Medicine Identity', key: 'nama_produk', render: (val, row) => (
+      <div className="flex flex-col py-1">
+        <span className="font-bold text-gray-900 dark:text-gray-100 uppercase text-xs tracking-tight">{val}</span>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">SKU: {row.sku || 'N/A'}</span>
+          <span className="w-1 h-1 rounded-full bg-gray-200" />
+          <span className="text-[10px] text-primary-500 font-bold uppercase tracking-widest">Aggregate View</span>
         </div>
       </div>
     )},
@@ -141,8 +126,8 @@ export default function PersediaanStokOpname() {
         <input 
           type="number" 
           value={val} 
-          onChange={(e) => updateStokFisik(row.batch_id, e.target.value)}
-          className="w-20 text-center px-2 py-1.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none"
+          onChange={(e) => updateStokFisik(row.produk_id, e.target.value)}
+          className="w-24 text-center px-2 py-2 bg-gray-50 hover:bg-white focus:bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-black text-primary-700 transition-all outline-none"
         />
       </div>
     )},
@@ -158,7 +143,7 @@ export default function PersediaanStokOpname() {
       );
     }},
     { label: '', key: 'action', align: 'right', width: '60px', render: (_, row) => (
-      <button onClick={() => removeItem(row.batch_id)} className="p-2 text-gray-400 hover:text-error-600 hover:bg-error-50 rounded-lg transition-all">
+      <button onClick={() => removeItem(row.produk_id)} className="p-2 text-gray-400 hover:text-error-600 hover:bg-error-50 rounded-lg transition-all">
         <FiTrash2 size={16} />
       </button>
     )}

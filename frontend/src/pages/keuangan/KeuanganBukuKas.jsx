@@ -78,7 +78,7 @@ export default function KeuanganBukuKas() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader title="Buku Kas" subtitle="Catatan arus kas masuk dan keluar apotek."
+      <PageHeader showPrint={true} title="Buku Kas" subtitle="Catatan arus kas masuk dan keluar apotek."
         breadcrumbs={[{ label: 'Keuangan', path: '/keuangan' }, { label: 'Buku Kas' }]} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">

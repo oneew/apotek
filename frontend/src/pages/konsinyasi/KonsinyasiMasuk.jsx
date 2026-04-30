@@ -62,7 +62,7 @@ export default function KonsinyasiMasuk() {
     },
     { 
       key: 'actions', 
-      label: 'Actions', 
+      label: 'Aksi', 
       align: 'right',
       render: (_, row) => (
         <div className="flex gap-2 justify-end items-center">
@@ -142,7 +142,7 @@ export default function KonsinyasiMasuk() {
   const addItem = () => {
     setFormData({
         ...formData,
-        items: [...formData.items, { produk_id: '', qty: 1, harga_beli: 0, satuan_id: '' }]
+        items: [...formData.items, { produk_id: '', qty: 1, harga_beli: 0, satuan_id: '', no_batch: '', tgl_expired: '' }]
     });
   };
 
@@ -312,7 +312,7 @@ export default function KonsinyasiMasuk() {
               <div className="space-y-2 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
                   {formData.items.map((item, index) => (
                       <div key={index} className="grid grid-cols-12 gap-3 items-end bg-gray-50/50 p-4 rounded-xl border border-gray-200 hover:bg-white hover:shadow-sm transition-all">
-                          <div className="col-span-5 space-y-1.5">
+                          <div className="col-span-4 space-y-1.5">
                               <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-tight">Pilih Produk</label>
                               <select 
                                   className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all"
@@ -325,7 +325,7 @@ export default function KonsinyasiMasuk() {
                                   ))}
                               </select>
                           </div>
-                          <div className="col-span-2 space-y-1.5">
+                          <div className="col-span-1 space-y-1.5">
                               <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-tight">Qty</label>
                               <input 
                                   type="number"
@@ -334,13 +334,32 @@ export default function KonsinyasiMasuk() {
                                   onChange={(e) => handleItemChange(index, 'qty', e.target.value)}
                               />
                           </div>
-                          <div className="col-span-4 space-y-1.5">
+                          <div className="col-span-3 space-y-1.5">
                               <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-tight">Harga Beli (Rp)</label>
                               <input 
                                   type="number"
                                   className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-mono font-bold text-gray-900"
                                   value={item.harga_beli}
                                   onChange={(e) => handleItemChange(index, 'harga_beli', e.target.value)}
+                              />
+                          </div>
+                          <div className="col-span-2 space-y-1.5">
+                              <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-tight">No. Batch</label>
+                              <input 
+                                  type="text"
+                                  placeholder="Batch..."
+                                  className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-semibold uppercase"
+                                  value={item.no_batch}
+                                  onChange={(e) => handleItemChange(index, 'no_batch', e.target.value)}
+                              />
+                          </div>
+                          <div className="col-span-2 space-y-1.5">
+                              <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-tight">EXP Date</label>
+                              <input 
+                                  type="date"
+                                  className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all font-medium"
+                                  value={item.tgl_expired}
+                                  onChange={(e) => handleItemChange(index, 'tgl_expired', e.target.value)}
                               />
                           </div>
                           <div className="col-span-1 text-right">

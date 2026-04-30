@@ -12,7 +12,7 @@ export default function PelayananTemplateRacikan() {
     { key: 'pembuat', label: 'Dibuat Oleh' },
     { 
       key: 'actions', 
-      label: 'Actions', 
+      label: 'Aksi', 
       align: 'center',
       render: () => (
         <div className="flex items-center justify-center gap-2">

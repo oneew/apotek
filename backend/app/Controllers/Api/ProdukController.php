@@ -46,6 +46,7 @@ class ProdukController extends BaseController
         }
 
         $id = $data['id'] ?? null;
+        $model = new ProdukModel();
         $insertData = [
             'tipe_produk' => strtolower($data['tipe_produk'] ?? 'umum'),
             'nama_produk' => $data['nama_produk'],
@@ -70,14 +71,14 @@ class ProdukController extends BaseController
 
         try {
             if ($id) {
-                $model->update($id, $insertData);
+                $model->update($id, (object)$insertData);
                 $this->logActivity('Master Produk', 'Update produk: ' . $insertData['nama_produk'], $id, $insertData);
                 return $this->respond([
                     'status'  => true,
                     'message' => 'Produk berhasil diupdate'
                 ]);
             } else {
-                $newId = $model->insert($insertData);
+                $newId = $model->insert((object)$insertData);
                 $this->logActivity('Master Produk', 'Tambah produk baru: ' . $insertData['nama_produk'], $newId, $insertData);
                 return $this->respondCreated([
                     'status'  => true,

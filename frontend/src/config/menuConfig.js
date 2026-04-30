@@ -1,7 +1,7 @@
 import {
   FiHome, FiBarChart2, FiShoppingCart, FiHeart, FiPackage,
   FiTruck, FiRepeat, FiPercent, FiDollarSign, FiBook,
-  FiUsers, FiFileText, FiTrendingUp, FiSettings, FiDatabase
+  FiUsers, FiFileText, FiTrendingUp, FiSettings, FiDatabase, FiActivity, FiPieChart
 } from 'react-icons/fi';
 
 /**
@@ -27,11 +27,11 @@ export const menuTree = [
     icon: FiBarChart2,
     type: 'parent',
     children: [
-      { id: 'dash-umum',       label: 'Dashboard Umum',       path: '/dashboard' },
-      { id: 'dash-penjualan',  label: 'Dashboard Penjualan',  path: '/dashboard/penjualan' },
-      { id: 'dash-pembelian',  label: 'Dashboard Pembelian',  path: '/dashboard/pembelian' },
+      { id: 'dash-umum', label: 'Dashboard Umum', path: '/dashboard' },
+      { id: 'dash-penjualan', label: 'Dashboard Penjualan', path: '/dashboard/penjualan' },
+      { id: 'dash-pembelian', label: 'Dashboard Pembelian', path: '/dashboard/pembelian' },
       { id: 'dash-persediaan', label: 'Dashboard Persediaan', path: '/dashboard/persediaan' },
-      { id: 'dash-keuangan',   label: 'Dash. Keuangan',       path: '/dashboard/keuangan' },
+      { id: 'dash-keuangan', label: 'Dash. Keuangan', path: '/dashboard/keuangan' },
     ],
   },
   {
@@ -40,12 +40,11 @@ export const menuTree = [
     icon: FiShoppingCart,
     type: 'parent',
     children: [
-      { id: 'kasir',              label: 'Kasir',               path: '/penjualan/kasir' },
-      { id: 'pesanan-penjualan',  label: 'Pesanan Penjualan',   path: '/penjualan/pesanan', badge: 'BETA' },
-      { id: 'daftar-penjualan',   label: 'Daftar Penjualan',    path: '/penjualan/daftar' },
-      { id: 'retur-penjualan',    label: 'Retur Penjualan',     path: '/penjualan/retur' },
-      { id: 'penjualan-tertolak', label: 'Penjualan Tertolak',  path: '/penjualan/tertolak' },
-      { id: 'qris',               label: 'QRIS',                path: '/penjualan/qris', badge: 'BETA' },
+      { id: 'kasir', label: 'Kasir', path: '/penjualan/kasir' },
+      { id: 'daftar-penjualan', label: 'Daftar Penjualan', path: '/penjualan/daftar' },
+      { id: 'retur-penjualan', label: 'Retur Penjualan', path: '/penjualan/retur' },
+      { id: 'penjualan-tertolak', label: 'Penjualan Tertolak', path: '/penjualan/tertolak' },
+      { id: 'qris', label: 'QRIS', path: '/penjualan/qris', badge: 'BETA' },
     ],
   },
   {
@@ -54,13 +53,14 @@ export const menuTree = [
     icon: FiHeart,
     type: 'parent',
     children: [
-      { id: 'kunjungan',       label: 'Kunjungan Pasien',    path: '/pelayanan/kunjungan', badge: 'BETA' },
-      { id: 'rekam-medis',     label: 'Daftar Rekam Medis',  path: '/pelayanan/rekam-medis' },
-      { id: 'pemeriksaan',     label: 'Pemeriksaan Awal',    path: '/pelayanan/pemeriksaan-awal' },
-      { id: 'terima-resep',    label: 'Penerimaan Resep',    path: '/pelayanan/penerimaan-resep' },
-      { id: 'tebus-resep',     label: 'Penebusan Resep',     path: '/pelayanan/penebusan-resep' },
-      { id: 'template-racik',  label: 'Template Racikan',    path: '/pelayanan/template-racikan' },
-      { id: 'swamedikasi',     label: 'Swamedikasi',         path: '/pelayanan/swamedikasi' },
+      { id: 'kunjungan', label: 'Kunjungan Pasien', path: '/pelayanan/kunjungan', badge: 'BETA' },
+      { id: 'rekam-medis', label: 'Daftar Rekam Medis', path: '/pelayanan/rekam-medis' },
+      { id: 'pemeriksaan', label: 'Pemeriksaan Awal', path: '/pelayanan/pemeriksaan-awal' },
+      { id: 'terima-resep', label: 'Penerimaan Resep', path: '/pelayanan/penerimaan-resep' },
+      { id: 'konseling', label: 'Konseling Apoteker', path: '/pelayanan/konseling', badge: 'NEW' },
+      { id: 'tebus-resep', label: 'Penebusan Resep', path: '/pelayanan/penebusan-resep' },
+      { id: 'template-racik', label: 'Template Racikan', path: '/pelayanan/template-racikan' },
+      { id: 'swamedikasi', label: 'Swamedikasi', path: '/pelayanan/swamedikasi' },
     ],
   },
   {
@@ -69,13 +69,12 @@ export const menuTree = [
     icon: FiPackage,
     type: 'parent',
     children: [
-      { id: 'daftar-produk',    label: 'Daftar Produk',      path: '/persediaan/daftar-produk' },
-      { id: 'defecta',          label: 'Defecta',            path: '/persediaan/defecta' },
-      { id: 'forecasting',      label: 'AI Forecasting',      path: '/persediaan/forecasting', badge: 'NEW' },
-      { id: 'stok-kadaluarsa',  label: 'Stok Kadaluarsa',    path: '/persediaan/stok-kadaluarsa' },
-      { id: 'stok-opname',      label: 'Stok Opname',        path: '/persediaan/stok-opname' },
-      { id: 'penyesuaian-stok', label: 'Penyesuaian Stok',   path: '/persediaan/penyesuaian-stok' },
-      { id: 'perpindahan-stok', label: 'Perpindahan Stok',   path: '/persediaan/perpindahan-stok' },
+      { id: 'daftar-produk', label: 'Daftar Produk', path: '/persediaan/daftar-produk' },
+      { id: 'defecta', label: 'Defecta', path: '/persediaan/defecta' },
+      { id: 'forecasting', label: 'AI Forecasting', path: '/persediaan/forecasting', badge: 'NEW' },
+      { id: 'stok-kadaluarsa', label: 'Stok Kadaluarsa', path: '/persediaan/stok-kadaluarsa' },
+      { id: 'stok-opname', label: 'Stok Opname', path: '/persediaan/stok-opname' },
+      { id: 'penyesuaian-stok', label: 'Penyesuaian Stok', path: '/persediaan/penyesuaian-stok' },
     ],
   },
   {
@@ -84,10 +83,21 @@ export const menuTree = [
     icon: FiTruck,
     type: 'parent',
     children: [
-      { id: 'rencana-beli',  label: 'Rencana Pembelian',  path: '/pembelian/rencana' },
-      { id: 'pesanan-beli',  label: 'Pesanan Pembelian',  path: '/pembelian/pesanan' },
-      { id: 'faktur-beli',   label: 'Faktur Pembelian',   path: '/pembelian/faktur' },
-      { id: 'retur-beli',    label: 'Retur Pembelian',     path: '/pembelian/retur' },
+      { id: 'pembelian-faktur', label: 'Daftar Pembelian', path: '/pembelian/faktur' },
+      { id: 'pembelian-rencana', label: 'Rencana Pembelian', path: '/pembelian/rencana' },
+      { id: 'pembelian-pesanan', label: 'Pesanan Pembelian', path: '/pembelian/pesanan' },
+      { id: 'pembelian-retur', label: 'Retur ke PBF', path: '/pembelian/retur', badge: 'NEW' },
+      { id: 'pembelian-supplier', label: 'Buku Supplier', path: '/pembelian/supplier', badge: null },
+      { id: 'master-template', label: 'Template Cetak', path: '/master/template-cetak', badge: 'NEW' },
+    ],
+  },
+  {
+    id: 'laporan-finance',
+    label: 'Laporan & Keuangan',
+    icon: FiPieChart,
+    type: 'parent',
+    children: [
+      { id: 'laporan-sipnap', label: 'Pelaporan SIPNAP', path: '/laporan/sipnap', badge: 'NEW' },
     ],
   },
   {
@@ -96,10 +106,10 @@ export const menuTree = [
     icon: FiRepeat,
     type: 'parent',
     children: [
-      { id: 'konsinyasi-masuk',  label: 'Konsinyasi Masuk',   path: '/konsinyasi/masuk' },
-      { id: 'status-konsinyasi', label: 'Status Konsinyasi',  path: '/konsinyasi/status' },
-      { id: 'retur-konsinyasi',  label: 'Retur Konsinyasi',   path: '/konsinyasi/retur' },
-      { id: 'stok-konsinyasi',   label: 'Stok Konsinyasi',    path: '/konsinyasi/stok' },
+      { id: 'konsinyasi-masuk', label: 'Konsinyasi Masuk', path: '/konsinyasi/masuk' },
+      { id: 'status-konsinyasi', label: 'Status Konsinyasi', path: '/konsinyasi/status' },
+      { id: 'retur-konsinyasi', label: 'Retur Konsinyasi', path: '/konsinyasi/retur' },
+      { id: 'stok-konsinyasi', label: 'Stok Konsinyasi', path: '/konsinyasi/stok' },
     ],
   },
   {
@@ -108,10 +118,10 @@ export const menuTree = [
     icon: FiPercent,
     type: 'parent',
     children: [
-      { id: 'bundel',         label: 'Bundel/Paket Produk', path: '/program-promo/bundel' },
-      { id: 'diskon-produk',  label: 'Diskon Produk',       path: '/program-promo/diskon' },
-      { id: 'voucher',        label: 'Voucher Diskon',      path: '/program-promo/voucher' },
-      { id: 'member',         label: 'Program Member',      path: '/program-promo/member', badge: 'PRO' },
+      { id: 'bundel', label: 'Bundel/Paket Produk', path: '/program-promo/bundel' },
+      { id: 'diskon-produk', label: 'Diskon Produk', path: '/program-promo/diskon' },
+      { id: 'voucher', label: 'Voucher Diskon', path: '/program-promo/voucher' },
+      { id: 'member', label: 'Program Member', path: '/program-promo/member', badge: 'PRO' },
     ],
   },
   {
@@ -120,10 +130,10 @@ export const menuTree = [
     icon: FiDollarSign,
     type: 'parent',
     children: [
-      { id: 'akun-kas',  label: 'Daftar Akun Kas', path: '/keuangan/akun-kas' },
-      { id: 'buku-kas',  label: 'Buku Kas',        path: '/keuangan/buku-kas' },
-      { id: 'utang',     label: 'Utang Usaha',     path: '/keuangan/utang' },
-      { id: 'piutang',   label: 'Piutang Usaha',   path: '/keuangan/piutang' },
+      { id: 'akun-kas', label: 'Daftar Akun Kas', path: '/keuangan/akun-kas' },
+      { id: 'buku-kas', label: 'Buku Kas', path: '/keuangan/buku-kas' },
+      { id: 'utang', label: 'Utang Usaha', path: '/keuangan/utang' },
+      { id: 'piutang', label: 'Piutang Usaha', path: '/keuangan/piutang' },
     ],
   },
   {
@@ -133,9 +143,9 @@ export const menuTree = [
     type: 'parent',
     badge: 'PRO',
     children: [
-      { id: 'akun-akuntansi', label: 'Daftar Akun',  path: '/akuntansi/daftar-akun' },
-      { id: 'buku-besar',     label: 'Buku Besar',   path: '/akuntansi/buku-besar' },
-      { id: 'aktiva-tetap',   label: 'Aktiva Tetap', path: '/akuntansi/aktiva-tetap' },
+      { id: 'akun-akuntansi', label: 'Daftar Akun', path: '/akuntansi/daftar-akun' },
+      { id: 'buku-besar', label: 'Buku Besar', path: '/akuntansi/buku-besar' },
+      { id: 'aktiva-tetap', label: 'Aktiva Tetap', path: '/akuntansi/aktiva-tetap' },
     ],
   },
   {
@@ -144,23 +154,33 @@ export const menuTree = [
     icon: FiUsers,
     type: 'parent',
     children: [
-      { id: 'pelanggan', label: 'Pelanggan',     path: '/kontak/pelanggan' },
-      { id: 'sales',     label: 'Sales/Pelayan', path: '/kontak/sales' },
-      { id: 'dokter',    label: 'Dokter',        path: '/kontak/dokter' },
-      { id: 'supplier',  label: 'Supplier',      path: '/kontak/supplier' },
+      { id: 'pelanggan', label: 'Pelanggan', path: '/kontak/pelanggan' },
+      { id: 'sales', label: 'Sales/Pelayan', path: '/kontak/sales' },
+      { id: 'dokter', label: 'Dokter', path: '/kontak/dokter' },
+      { id: 'supplier', label: 'Supplier', path: '/kontak/supplier' },
     ],
   },
   {
-    id: 'laporan',
+    id: 'klinis',
+    label: 'Klinis & Layanan',
+    icon: FiActivity,
+    type: 'parent',
+    children: [
+      { id: 'resep-digital', label: 'Resep Digital (E-RX)', path: '/klinis/resep-digital', badge: 'NEW' },
+      { id: 'fefo-dash', label: 'FEFO & Expiry', path: '/klinis/fefo', badge: 'AI' },
+    ],
+  },
+  {
+    id: 'laporan-utama',
     label: 'Laporan',
     icon: FiFileText,
     type: 'parent',
     children: [
-      { id: 'lap-penjualan',  label: 'Laporan Penjualan',   path: '/laporan/penjualan' },
-      { id: 'lap-pembelian',  label: 'Laporan Pembelian',   path: '/laporan/pembelian' },
-      { id: 'lap-persediaan', label: 'Laporan Persediaan',  path: '/laporan/persediaan' },
-      { id: 'lap-keuangan',   label: 'Laporan Keuangan',    path: '/laporan/keuangan' },
-      { id: 'lap-presensi',   label: 'Laporan Presensi',    path: '/laporan/presensi', badge: 'PRO' },
+      { id: 'lap-penjualan', label: 'Laporan Penjualan', path: '/laporan/penjualan' },
+      { id: 'lap-pembelian', label: 'Laporan Pembelian', path: '/laporan/pembelian' },
+      { id: 'lap-persediaan', label: 'Laporan Persediaan', path: '/laporan/persediaan' },
+      { id: 'lap-keuangan', label: 'Laporan Keuangan', path: '/laporan/keuangan' },
+      { id: 'lap-presensi', label: 'Laporan Presensi', path: '/laporan/presensi', badge: 'PRO' },
     ],
   },
   {
@@ -169,9 +189,9 @@ export const menuTree = [
     icon: FiTrendingUp,
     type: 'parent',
     children: [
-      { id: 'analisis-pareto',    label: 'Analisis Pareto',    path: '/analisis/pareto' },
+      { id: 'analisis-pareto', label: 'Analisis Pareto', path: '/analisis/pareto' },
       { id: 'analisis-pembelian', label: 'Analisis Pembelian', path: '/analisis/pembelian' },
-      { id: 'analisis-harga',     label: 'Analisis Harga',     path: '/analisis/harga' },
+      { id: 'analisis-harga', label: 'Analisis Harga', path: '/analisis/harga' },
     ],
   },
   {
@@ -180,6 +200,7 @@ export const menuTree = [
     icon: FiDatabase,
     type: 'parent',
     children: [
+      { id: 'master-pegawai', label: 'Master Pegawai', path: '/master/pegawai', badge: 'NEW' },
       { id: 'master-produk', label: 'Master Produk', path: '/master/produk' },
       { id: 'master-formula', label: 'Master Formula', path: '/master/formula', badge: 'NEW' },
       { id: 'master-kategori', label: 'Master Kategori', path: '/master/kategori' },
@@ -201,13 +222,16 @@ export const menuTree = [
     icon: FiSettings,
     type: 'parent',
     children: [
-      { id: 'daftar-pengguna',  label: 'Daftar Pengguna',       path: '/manajemen-pengguna/daftar' },
-      { id: 'peran-hak',        label: 'Peran & Hak Akses',     path: '/manajemen-pengguna/peran' },
-      { id: 'jadwal-kerja',     label: 'Jadwal Kerja',          path: '/manajemen-pengguna/jadwal', badge: 'PRO' },
-      { id: 'riwayat-presensi', label: 'Riwayat Presensi',      path: '/manajemen-pengguna/presensi', badge: 'PRO' },
-      { id: 'riwayat-shift',    label: 'Riwayat Shift/Sesi',    path: '/manajemen-pengguna/shift' },
-      { id: 'log-aktivitas',    label: 'Log Aktivitas',         path: '/manajemen-pengguna/log', badge: 'BETA' },
-      { id: 'satusehat',        label: 'Integrasi SATUSEHAT',    path: '/manajemen-pengguna/satusehat', badge: 'NEW' },
+      { id: 'master-users', label: 'Daftar Pengguna', path: '/manajemen-pengguna/daftar' },
+      { id: 'master-roles', label: 'Role & Izin', path: '/manajemen-pengguna/roles' },
+      { id: 'master-satusehat', label: 'SATUSEHAT Bridge', path: '/manajemen-pengguna/satusehat', badge: 'PRO' },
+      { id: 'master-security', label: 'Audit & Security', path: '/manajemen-pengguna/security', badge: 'SECURE' },
+      { id: 'kpi-dashboard', label: 'KPI & Performa Kasir', path: '/manajemen-pengguna/kpi', badge: 'NEW' },
+      { id: 'riwayat-presensi', label: 'Riwayat Presensi', path: '/manajemen-pengguna/presensi', badge: 'PRO' },
+      { id: 'riwayat-shift', label: 'Riwayat Shift/Sesi', path: '/manajemen-pengguna/shift' },
+      { id: 'log-aktivitas', label: 'Log Aktivitas', path: '/manajemen-pengguna/log', badge: 'BETA' },
+      { id: 'satusehat-integration', label: 'Integrasi SATUSEHAT', path: '/manajemen-pengguna/satusehat', badge: 'NEW' },
+      { id: 'whatsapp-gateway', label: 'WhatsApp Gateway', path: '/manajemen-pengguna/whatsapp', badge: 'NEW' },
     ],
   },
 ];

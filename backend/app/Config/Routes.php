@@ -40,6 +40,9 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($
         $routes->resource('roles', ['controller' => 'RoleController']);
         $routes->post('roles/permissions/(:num)', 'RoleController::update_permissions/$1');
         $routes->resource('penjualan', ['controller' => 'PenjualanController']);
+        $routes->post('penjualan/log-tertolak', 'PenjualanController::log_tertolak');
+        $routes->post('penjualan/retur', 'PenjualanController::retur');
+        $routes->post('penjualan/restore/(:num)', 'PenjualanController::restore/$1');
         $routes->get('pelanggan', 'PelangganController::index');
         $routes->post('pelanggan', 'PelangganController::create');
         $routes->get('dokter', 'DokterController::index');
@@ -55,19 +58,67 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($
         $routes->get('stok/expired', 'StokController::expired');
         $routes->post('stok/opname', 'StokController::opname');
         $routes->get('suppliers', 'PembelianController::suppliers');
+        $routes->resource('pembelian-retur', ['controller' => 'ReturPembelianController']);
+        $routes->resource('template-cetak', ['controller' => 'TemplateCetakController']);
         $routes->resource('arus-kas', ['controller' => 'ArusKasController']);
         $routes->get('konsinyasi/stok', 'KonsinyasiController::stok');
         $routes->resource('konsinyasi', ['controller' => 'KonsinyasiController']);
         $routes->resource('promo', ['controller' => 'PromoController']);
         $routes->resource('formula', ['controller' => 'FormulaController']);
+        $routes->resource('konseling', ['controller' => 'KonselingController']);
         
+        // HR & SDM
+        $routes->get('hr/jabatan', 'HrController::getJabatan');
+        $routes->get('hr/pegawai', 'HrController::getPegawai');
+        $routes->post('hr/pegawai', 'HrController::createPegawai');
+        $routes->put('hr/pegawai/(:num)', 'HrController::updatePegawai/$1');
+        $routes->delete('hr/pegawai/(:num)', 'HrController::deletePegawai/$1');
+        
+        $routes->get('sipnap/laporan', 'SipnapController::generateLaporan');
+        $routes->get('kpi/dashboard', 'KpiController::dashboard');
+        
+        // Audit & Security Trail
+        $routes->get('audit/logs', 'AuditTrailController::index');
+        $routes->get('audit/verify', 'AuditTrailController::verify');
+        
+        $routes->get('hr/jadwal', 'HrController::getJadwal');
+        $routes->post('hr/jadwal', 'HrController::saveJadwal');
+
+        // KPI & Dashboard
+        $routes->get('kpi/dashboard', 'KpiController::dashboard');
+        
+        // OCR / Pembaca Faktur
+        $routes->post('ocr/scan', 'OcrController::scan');
+        
+        // WhatsApp Gateway
+        $routes->get('whatsapp/settings', 'WhatsappController::settings');
+        $routes->post('whatsapp/settings', 'WhatsappController::saveSettings');
+        $routes->post('whatsapp/test', 'WhatsappController::testSend');
+        $routes->get('whatsapp/log', 'WhatsappController::log');
+        
+        $routes->get('logs', 'LogController::index');
+        $routes->get('logs/verify-integrity', 'WhatsappController::verifyIntegrity');
+
         // SATUSEHAT Integration
         $routes->get('satusehat/config', 'SatusehatController::index');
         $routes->post('satusehat/token', 'SatusehatController::token');
         $routes->post('satusehat/test', 'SatusehatController::test');
         $routes->post('satusehat/send-dispense', 'SatusehatController::sendDispense');
 
-        $routes->get('logs', 'LogController::index');
+        // Resep Digital & Clinical Safety
+        $routes->get('resep', 'ResepController::index');
+        $routes->post('resep', 'ResepController::create');
+        $routes->get('resep/(:segment)', 'ResepController::show/$1');
+        $routes->get('resep/rekap/kasir', 'ResepController::index?sumber=Kasir'); // Alias for easier dev
+        
+        
+        $routes->post('interaksi/check', 'InteraksiController::checkInteraction');
+        $routes->post('interaksi/seed', 'InteraksiController::seedInteraksi');
+
+        $routes->get('fefo/dashboard', 'FefoController::dashboard');
+        $routes->post('fefo/seed', 'FefoController::seedExpiry');
+
+        $routes->post('fefo/seed', 'FefoController::seedExpiry');
     });
     
     // Protected routes (JWT required)

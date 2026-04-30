@@ -8,7 +8,7 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#18181b] transition-colors duration-200">
-      <Sidebar collapsed={sidebarCollapsed} />
+      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
       <div className={`sidebar-transition min-h-screen flex flex-col ${sidebarCollapsed ? 'md:ml-[80px]' : 'ml-0 md:ml-[280px]'}`}>
         <TopBar onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} />
         <main className="p-6 md:p-8 flex-1">

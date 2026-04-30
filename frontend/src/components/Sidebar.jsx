@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { FiChevronDown, FiChevronRight, FiSearch, FiSettings } from 'react-icons/fi';
+import { FiChevronDown, FiChevronRight, FiSearch, FiSettings, FiChevronsLeft, FiChevronsRight } from 'react-icons/fi';
 import { menuTree } from '../config/menuConfig';
 
-export default function Sidebar({ collapsed }) {
+export default function Sidebar({ collapsed, onToggle }) {
   const [openGroups, setOpenGroups] = useState(['Dashboard']);
   const location = useLocation();
 
@@ -21,17 +21,41 @@ export default function Sidebar({ collapsed }) {
         ${collapsed ? 'w-20' : 'w-[280px]'}`}
     >
       {/* Brand Section */}
-      <div className="h-16 flex items-center px-6 border-b border-gray-100 dark:border-gray-800 overflow-hidden shrink-0">
-        <div className="w-9 h-9 bg-primary-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary-600/20">
-          <span className="text-lg font-bold">🏥</span>
-        </div>
-        {!collapsed && (
-          <div className="ml-3 animate-unt-fade">
-            <h1 className="text-base font-bold tracking-tight text-gray-900 dark:text-white leading-tight">Nova Farma</h1>
-            <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-0.5">Apotek Digital</p>
+      <div className={`h-16 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 overflow-hidden shrink-0 ${collapsed ? 'px-0 justify-center' : 'px-6'}`}>
+        <div className="flex items-center overflow-hidden">
+          <div className="w-9 h-9 bg-primary-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary-600/20">
+            <span className="text-lg font-bold">🏥</span>
           </div>
+          {!collapsed && (
+            <div className="ml-3 animate-unt-fade">
+              <h1 className="text-base font-bold tracking-tight text-gray-900 dark:text-white leading-tight">Nova Farma</h1>
+              <p className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest mt-0.5">Apotek Digital</p>
+            </div>
+          )}
+        </div>
+        
+        {!collapsed && (
+          <button 
+            onClick={onToggle}
+            className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/40 rounded-lg transition-all animate-unt-fade"
+            title="Minimize Sidebar"
+          >
+            <FiChevronsLeft size={18} />
+          </button>
         )}
       </div>
+
+      {collapsed && (
+        <div className="flex justify-center py-4 border-b border-gray-50 dark:border-gray-900">
+           <button 
+            onClick={onToggle}
+            className="p-2 text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/40 rounded-lg transition-all"
+            title="Expand Sidebar"
+          >
+            <FiChevronsRight size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto mt-4 px-3 space-y-0.5">
@@ -40,7 +64,7 @@ export default function Sidebar({ collapsed }) {
             <FiSearch className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
             <input 
               type="text" 
-              placeholder="Search..." 
+              placeholder="Cari..." 
               className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg py-2 pl-9 pr-4 text-xs font-medium text-gray-600 dark:text-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-300 transition-all"
             />
           </div>

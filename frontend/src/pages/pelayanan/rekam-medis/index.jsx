@@ -15,7 +15,7 @@ export default function PelayananRekamMedis() {
     { key: 'alamat', label: 'Alamat' },
     { 
       key: 'actions', 
-      label: 'Actions', 
+      label: 'Aksi', 
       align: 'center',
       render: () => (
         <div className="flex items-center justify-center gap-2">

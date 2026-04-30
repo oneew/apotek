@@ -10,8 +10,13 @@ class ArusKasController extends BaseController
 {
     use ResponseTrait;
 
-    protected $modelName = 'App\Models\ArusKasModel';
-    protected $format    = 'json';
+    protected $format = 'json';
+    protected ArusKasModel $model;
+
+    public function __construct()
+    {
+        $this->model = new ArusKasModel();
+    }
 
     public function index()
     {
@@ -24,9 +29,16 @@ class ArusKasController extends BaseController
     public function create()
     {
         $data = $this->request->getJSON(true);
+        if (!$data) {
+            return $this->fail('Data tidak valid atau kosong.');
+        }
         if ($this->model->insert($data)) {
             $insertID = $this->model->getInsertID();
-            $this->logActivity('Keuangan', 'Entri Kas Baru: ' . ($data['keterangan'] ?? 'N/A'), $insertID, $data);
+            try {
+                $this->logActivity('Keuangan', 'Entri Kas Baru: ' . ($data['keterangan'] ?? 'N/A'), $insertID, $data);
+            } catch (\Throwable $e) {
+                log_message('warning', 'logActivity failed in ArusKasController: ' . $e->getMessage());
+            }
             return $this->respondCreated(['status' => true, 'message' => 'Entri kas berhasil disimpan']);
         }
         return $this->fail($this->model->errors());
@@ -35,7 +47,11 @@ class ArusKasController extends BaseController
     public function delete($id = null)
     {
         if ($this->model->delete($id)) {
-            $this->logActivity('Keuangan', 'Hapus Entri Kas ID: ' . $id, $id);
+            try {
+                $this->logActivity('Keuangan', 'Hapus Entri Kas ID: ' . $id, $id);
+            } catch (\Throwable $e) {
+                log_message('warning', 'logActivity failed in ArusKasController delete: ' . $e->getMessage());
+            }
             return $this->respondDeleted(['status' => true, 'message' => 'Entri kas berhasil dihapus']);
         }
         return $this->failNotFound();

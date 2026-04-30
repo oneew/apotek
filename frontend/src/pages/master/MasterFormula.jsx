@@ -71,7 +71,7 @@ export default function MasterFormula() {
 
   const handleSubmit = async () => {
     if (!formData.nama_formula || !formData.produk_id || formData.items.length === 0) {
-      Swal.fire('Validation Error', 'Please complete the formula header and add at least one ingredient.', 'warning');
+      Swal.fire('Kesalahan Validasi', 'Mohon lengkapi header formula dan tambahkan setidaknya satu bahan.', 'warning');
       return;
     }
 
@@ -83,43 +83,43 @@ export default function MasterFormula() {
       });
       const result = await response.json();
       if (result.status) {
-        Swal.fire('Success', 'Formula created successfully', 'success');
+        Swal.fire('Berhasil', 'Formula berhasil dibuat', 'success');
         setIsModalOpen(false);
         fetchFormulas();
       }
     } catch (err) {
-      Swal.fire('Error', 'Failed to save formula', 'error');
+      Swal.fire('Error', 'Gagal menyimpan formula', 'error');
     }
   };
 
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
-      title: 'Are you sure?',
-      text: "You won't be able to revert this!",
+      title: 'Apakah anda yakin?',
+      text: "Data ini akan dihapus permanen!",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Yes, delete it!'
+      confirmButtonText: 'Ya, Hapus!'
     });
 
     if (confirm.isConfirmed) {
       try {
         await fetch(`http://localhost:8080/api/master/formula/${id}`, { method: 'DELETE' });
-        Swal.fire('Deleted!', 'Formula has been deleted.', 'success');
+        Swal.fire('Terhapus!', 'Formula telah dihapus.', 'success');
         fetchFormulas();
       } catch (err) {
-        Swal.fire('Error', 'Failed to delete formula', 'error');
+        Swal.fire('Error', 'Gagal menghapus formula', 'error');
       }
     }
   };
 
   const columns = [
-    { label: 'Formula Name', key: 'nama_formula', render: (val) => <span className="font-semibold text-gray-900">{val}</span> },
-    { label: 'Resulting Product', key: 'hasil_produk', render: (val) => <span className="text-primary-600 font-medium uppercase text-xs">{val}</span> },
-    { label: 'Created At', key: 'created_at', render: (val) => <span className="text-xs text-gray-500">{new Date(val).toLocaleDateString()}</span> },
-    { label: 'Action', key: 'id', align: 'right', render: (id) => (
-      <button onClick={() => handleDelete(id)} className="text-gray-400 hover:text-red-500 p-2 rounded-lg hover:bg-gray-50 transition-all">
+    { label: 'Nama Formula', key: 'nama_formula', render: (val) => <span className="font-semibold text-gray-900">{val}</span> },
+    { label: 'Produk Hasil', key: 'hasil_produk', render: (val) => <span className="text-primary-600 font-medium uppercase text-xs">{val}</span> },
+    { label: 'Dibuat Pada', key: 'created_at', render: (val) => <span className="text-xs text-gray-500">{new Date(val).toLocaleDateString()}</span> },
+    { label: 'Aksi', key: 'id', align: 'right', render: (id) => (
+      <button onClick={() => handleDelete(id)} className="text-gray-400 hover:text-red-500 p-2 rounded-lg hover:bg-gray-50 transition-all" title="Hapus">
         <FiTrash2 size={16} />
       </button>
     )}
@@ -128,8 +128,8 @@ export default function MasterFormula() {
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
       <SectionHeader 
-        title="Drug Compounding Formulas" 
-        subtitle="Manage master recipes for compounded pharmaceuticals and ingredient ratios."
+        title="Formula Peracikan Obat" 
+        subtitle="Kelola resep master untuk farmasi racikan dan rasio bahan."
         icon={<FiLayers size={24} className="text-gray-500" />}
       />
 
@@ -141,7 +141,7 @@ export default function MasterFormula() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           primaryAction={{
-            label: "Define New Formula",
+            label: "Definisikan Formula Baru",
             onClick: () => {
               setFormData({ nama_formula: '', produk_id: '', keterangan: '', items: [] });
               setIsModalOpen(true);
@@ -153,29 +153,29 @@ export default function MasterFormula() {
       <ModalDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Formula Definition Wizard"
-        subtitle="Specify ingredients and ratios for the resulting compounded product."
+        title="Wizard Definisi Formula"
+        subtitle="Tentukan bahan dan rasio untuk produk racikan hasil."
         maxWidth="max-w-3xl"
         icon={<FiActivity />}
       >
         <div className="p-8 space-y-8">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase">Formula Target Product</label>
+              <label className="text-xs font-semibold text-gray-700 uppercase">Produk Target Formula</label>
               <select 
                 name="produk_id"
                 value={formData.produk_id}
                 onChange={(e) => handleFieldChange(e.target.name, e.target.value)}
                 className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium outline-none focus:border-primary-500"
               >
-                <option value="">Select Result Product...</option>
+                <option value="">Pilih Produk Hasil...</option>
                 {products.filter(p => p.tipe_produk === 'racika' || p.tipe_produk === 'obat').map(p => (
                   <option key={p.id} value={p.id}>{p.nama_produk}</option>
                 ))}
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-gray-700 uppercase">Master Formula Name</label>
+              <label className="text-xs font-semibold text-gray-700 uppercase">Nama Master Formula</label>
               <input 
                 type="text"
                 value={formData.nama_formula}
@@ -188,9 +188,9 @@ export default function MasterFormula() {
 
           <div className="space-y-4">
             <div className="flex justify-between items-center border-b border-gray-100 pb-2">
-              <h4 className="text-sm font-bold text-gray-800 uppercase tracking-tight">Ingredient List</h4>
+              <h4 className="text-sm font-bold text-gray-800 uppercase tracking-tight">Daftar Bahan (Ingredient)</h4>
               <button onClick={handleAddItem} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-primary-600 rounded-lg text-[10px] font-bold uppercase hover:bg-primary-50 transition-all">
-                <FiPlus size={14} /> Add Ingredient
+                <FiPlus size={14} /> Tambah Bahan
               </button>
             </div>
 
@@ -198,13 +198,13 @@ export default function MasterFormula() {
               {formData.items.map((item, index) => (
                 <div key={index} className="grid grid-cols-12 gap-3 items-center bg-gray-50 p-3 rounded-xl border border-gray-200">
                   <div className="col-span-6 space-y-1">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase">Product</label>
+                    <label className="text-[10px] font-bold text-gray-500 uppercase">Produk</label>
                     <select 
                       value={item.produk_id}
                       onChange={(e) => handleItemChange(index, 'produk_id', e.target.value)}
                       className="w-full bg-white border border-gray-300 rounded-lg px-2 py-1.5 text-xs font-medium outline-none"
                     >
-                      <option value="">Select Ingredient...</option>
+                      <option value="">Pilih Bahan...</option>
                       {products.map(p => <option key={p.id} value={p.id}>{p.nama_produk}</option>)}
                     </select>
                   </div>
@@ -227,15 +227,15 @@ export default function MasterFormula() {
               {formData.items.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-10 text-gray-400">
                   <FiLayers size={32} strokeWidth={1.5} className="mb-2 opacity-20" />
-                  <span className="text-xs font-medium">No ingredients added yet.</span>
+                  <span className="text-xs font-medium">Belum ada bahan yang ditambahkan.</span>
                 </div>
               )}
             </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-6 border-t border-gray-100">
-            <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 text-xs font-bold uppercase text-gray-500 hover:bg-gray-100 rounded-lg transition-all">Discard</button>
-            <button onClick={handleSubmit} className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-[11px] uppercase rounded-lg shadow-sm transition-all active:scale-95">Save Master Formula</button>
+            <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 text-xs font-bold uppercase text-gray-500 hover:bg-gray-100 rounded-lg transition-all">Batal</button>
+            <button onClick={handleSubmit} className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-[11px] uppercase rounded-lg shadow-sm transition-all active:scale-95">Simpan Master Formula</button>
           </div>
         </div>
       </ModalDialog>

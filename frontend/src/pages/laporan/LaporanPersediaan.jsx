@@ -29,7 +29,7 @@ export default function LaporanPersediaan() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader title="Laporan Persediaan" subtitle="Status stok produk dan peringatan persediaan."
+      <PageHeader showPrint={true} title="Laporan Persediaan" subtitle="Status stok produk dan peringatan persediaan."
         breadcrumbs={[{ label: 'Laporan', path: '/laporan' }, { label: 'Persediaan' }]} />
 
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">

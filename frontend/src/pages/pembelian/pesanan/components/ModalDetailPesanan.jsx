@@ -1,10 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ModalDialog from '../../../../components/ui/ModalDialog';
 import { FiX, FiPrinter, FiPackage, FiCalendar, FiUser, FiTruck, FiDollarSign, FiInfo } from 'react-icons/fi';
+import PrintWrapper from '../../../../components/print/PrintWrapper';
+import LetterA4 from '../../../../components/print/LetterA4';
+import DynamicPrinter from '../../../../components/print/DynamicPrinter';
+import axios from 'axios';
 
 export default function ModalDetailPesanan({ isOpen, onClose, id }) {
+  const printRef = useRef(null);
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [template, setTemplate] = useState(null);
 
   useEffect(() => {
     if (isOpen && id) {
@@ -17,7 +23,14 @@ export default function ModalDetailPesanan({ isOpen, onClose, id }) {
     try {
       const response = await fetch(`http://localhost:8080/api/master/pesanan-pembelian/${id}`);
       const result = await response.json();
-      if (result.status) setData(result.data);
+      if (result.status) {
+          setData(result.data);
+          // Fetch default PO template
+          const tResp = await axios.get(`http://localhost:8080/api/master/template-cetak?kode=PO&is_default=1`);
+          if (tResp.data.status && tResp.data.data.length > 0) {
+              setTemplate(tResp.data.data[0]);
+          }
+      }
     } catch (err) { console.error(err); }
     finally { setIsLoading(false); }
   };
@@ -129,7 +142,9 @@ export default function ModalDetailPesanan({ isOpen, onClose, id }) {
                    </span>
                 </div>
                 <div className="flex gap-3">
-                    <button className="inline-flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 rounded-lg text-sm font-semibold shadow-sm transition-all active:scale-95">
+                    <button 
+                        onClick={() => printRef.current?.print()}
+                        className="inline-flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 rounded-lg text-sm font-semibold shadow-sm transition-all active:scale-95">
                         <FiPrinter size={16} /> Print Manifesto
                     </button>
                     <button onClick={onClose} className="px-10 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold shadow-sm transition-all active:scale-95">
@@ -137,6 +152,36 @@ export default function ModalDetailPesanan({ isOpen, onClose, id }) {
                     </button>
                 </div>
             </div>
+
+            <PrintWrapper ref={printRef}>
+                {template ? (
+                    <DynamicPrinter 
+                        templateHtml={template.content_html}
+                        data={{
+                            ...data,
+                            no_po: data.no_po,
+                            tanggal: data.tanggal_po,
+                            supplier_name: data.nama_supplier,
+                            total: parseFloat(data.total_estimate).toLocaleString('id-ID'),
+                        }}
+                    />
+                ) : (
+                    <LetterA4 
+                        data={{
+                            ...data,
+                            sp_number: data.no_po,
+                            tanggal: data.tanggal_po,
+                            items: data.items?.map(i => ({
+                                ...i,
+                                nama_produk: i.nama_produk,
+                                qty: i.jumlah,
+                                harga_satuan: i.harga_estimate
+                            }))
+                        }} 
+                        type="SURAT_PESANAN"
+                    />
+                )}
+            </PrintWrapper>
           </>
         ) : (
           <div className="py-20 text-center opacity-40">

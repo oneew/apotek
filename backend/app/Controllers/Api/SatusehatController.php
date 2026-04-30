@@ -70,11 +70,16 @@ class SatusehatController extends BaseController
         
         // Fetch transaction details and product KFA codes
         $db = \Config\Database::connect();
-        $builder = $db->table('t_penjualan_detail as d')
-            ->select('d.*, p.kfa_code, p.kfa_name, p.nama_produk')
-            ->join('m_produk as p', 'p.id = d.produk_id', 'left')
-            ->where('d.penjualan_id', $data['sale_id']);
-        $items = $builder->get()->getResultArray();
+        $sale = $db->table('t_penjualan')->where('invoice_number', $data['invoice'])->get()->getRowArray();
+        
+        $items = [];
+        if ($sale) {
+            $builder = $db->table('t_penjualan_detail as d')
+                ->select('d.*, p.kfa_code, p.kfa_name, p.nama_produk')
+                ->join('m_produk as p', 'p.id = d.produk_id', 'left')
+                ->where('d.penjualan_id', $sale['id']);
+            $items = $builder->get()->getResultArray();
+        }
 
         $fhirResource = [
             'resourceType' => 'MedicationDispense',
@@ -95,7 +100,13 @@ class SatusehatController extends BaseController
             'whenHandedOver' => date('c'),
         ];
 
-        $this->logActivity('SATUSEHAT', 'Kirim MedicationDispense: ' . ($data['invoice'] ?? 'N/A'), null, $fhirResource);
+        $db->table('t_satusehat_log')->insert([
+            'endpoint' => 'MedicationDispense',
+            'payload' => json_encode($fhirResource),
+            'response' => json_encode(['status' => 'Created', 'fhir_id' => 'dispense-' . uniqid()]),
+            'status_code' => 201,
+            'created_at' => date('Y-m-d H:i:s')
+        ]);
 
         return $this->respond([
             'status' => true,

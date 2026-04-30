@@ -112,3 +112,55 @@
     to { opacity: 1; transform: translateY(0); }
   }
 }
+
+@media print {
+  /* Hide non-printable UI elements */
+  nav, aside, button, .sidebar, input, select, .hide-scrollbar, .sticky, form {
+    display: none !important;
+  }
+  
+  /* Reset container and backgrounds */
+  body, main, .bg-app, .bg-card, .dark, div {
+    background-color: transparent !important;
+    background: none !important;
+    color: black !important;
+  }
+
+  /* Reset layout constraints */
+  .max-w-\[1400px\] {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Standardize Font */
+  * {
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Expand Tables */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 20px !important;
+  }
+  
+  th, td {
+    border: 1px solid #ddd !important;
+    padding: 8px 12px !important;
+    white-space: normal !important;
+  }
+  
+  th {
+    background-color: #f3f4f6 !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  @page {
+    margin: 1.5cm;
+    size: auto;
+  }
+}

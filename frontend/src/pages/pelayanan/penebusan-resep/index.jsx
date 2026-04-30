@@ -24,7 +24,7 @@ export default function PelayananPenebusanResep() {
     { key: 'harga', label: 'Harga Total', align: 'right' },
     { 
       key: 'actions', 
-      label: 'Actions', 
+      label: 'Aksi', 
       align: 'center',
       render: () => (
         <div className="flex items-center justify-center gap-2">
