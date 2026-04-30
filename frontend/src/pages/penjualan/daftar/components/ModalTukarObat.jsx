@@ -33,10 +33,10 @@ export default function ModalTukarObat({ isOpen, onClose, saleData, onComplete }
     const replacementPrice = getHargaJual(prod);
     const returnPrice = parseFloat(selectedReturnedItem.harga_jual_per_satuan);
 
-    if (replacementPrice !== returnPrice) {
+    if (replacementPrice < returnPrice) {
       Swal.fire({
         title: 'Retur Ditolak',
-        text: `Harga obat pengganti (Rp ${replacementPrice.toLocaleString('id-ID')}) tidak sama dengan obat yang diretur (Rp ${returnPrice.toLocaleString('id-ID')}). Retur tukar barang hanya diizinkan untuk barang dengan harga yang persis sama.`,
+        text: `Harga obat pengganti (Rp ${replacementPrice.toLocaleString('id-ID')}) lebih kecil dari obat yang diretur (Rp ${returnPrice.toLocaleString('id-ID')}). Obat pengganti harus memiliki harga yang sama atau lebih besar.`,
         icon: 'error',
         confirmButtonColor: '#7c3aed'
       });
@@ -97,7 +97,7 @@ export default function ModalTukarObat({ isOpen, onClose, saleData, onComplete }
     <ModalDialog
       isOpen={isOpen} onClose={onClose}
       title={`Retur & Tukar Barang - ${saleData.no_invoice}`}
-      subtitle="Fasilitas penukaran obat jika rusak atau terdapat kekeliruan, diwajibkan menukar dengan item seharga."
+      subtitle="Fasilitas penukaran obat jika rusak atau terdapat kekeliruan, diwajibkan menukar dengan item seharga atau lebih."
       icon={<FiRefreshCcw />}
       maxWidth="max-w-4xl"
     >
@@ -153,7 +153,7 @@ export default function ModalTukarObat({ isOpen, onClose, saleData, onComplete }
               <div className="grid grid-cols-2 gap-3 flex-1 overflow-y-auto content-start custom-scrollbar pr-2 pb-20">
                 {searchObat.length > 0 && filteredProducts.map(p => {
                   const pPrice = getHargaJual(p);
-                  const isMatch = pPrice === parseFloat(selectedReturnedItem.harga_jual_per_satuan);
+                  const isMatch = pPrice >= parseFloat(selectedReturnedItem.harga_jual_per_satuan);
                   return (
                     <button 
                       key={p.id} onClick={() => handleSelectReplacement(p)}

@@ -13,11 +13,12 @@ class StokController extends ResourceController
     {
         $db = \Config\Database::connect();
         
-        // Sum stock from batches for each product
+        // Sum stock from batches for each product, include smallest unit name
         $data = $db->table('m_produk p')
-            ->select('p.id, p.nama_produk, p.sku, p.stok_minimal, r.nama_rak, IFNULL(SUM(b.stok_tersedia), 0) as stok_total, p.harga_beli_referensi, p.is_dijual')
+            ->select('p.id, p.nama_produk, p.sku, p.stok_minimal, r.nama_rak, IFNULL(SUM(b.stok_tersedia), 0) as stok_total, p.harga_beli_referensi, p.is_dijual, s.nama_satuan as nama_satuan_terkecil')
             ->join('t_stok_batch b', 'b.produk_id = p.id', 'left')
             ->join('m_rak r', 'r.id = p.lokasi_rak_id', 'left')
+            ->join('m_satuan s', 's.id = p.satuan_utama_id', 'left')
             ->groupBy('p.id')
             ->get()->getResultArray();
 

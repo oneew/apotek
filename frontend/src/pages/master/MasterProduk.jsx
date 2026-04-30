@@ -12,7 +12,9 @@ export default function MasterProduk() {
   
   const [isModalSatuanOpen, setIsModalSatuanOpen] = useState(false);
   const [showMargin, setShowMargin] = useState(false);
-  const [satuanLainnya, setSatuanLainnya] = useState([]);
+  // konversi: array of { nama_satuan_beli: 'Strip', isi: 10, is_default_beli: false }
+  const [konversi, setKonversi] = useState([]);
+  const [satuanList, setSatuanList] = useState([]); // list dari API m_satuan
   
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,8 +60,17 @@ export default function MasterProduk() {
     }
   };
 
+  const fetchSatuan = async () => {
+    try {
+      const res = await fetch('http://localhost:8080/api/master/satuan');
+      const result = await res.json();
+      if (result.status) setSatuanList(result.data);
+    } catch (e) { console.error(e); }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchSatuan();
   }, []);
 
   const handleInputChange = (e) => {
@@ -84,11 +95,13 @@ export default function MasterProduk() {
 
     setIsSubmitting(true);
     try {
+      // Sertakan data konversi dalam payload
+      const payload = { ...formData, konversi };
       const url = isEditing ? `http://localhost:8080/api/produk/${formData.id}` : 'http://localhost:8080/api/produk';
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
       const result = await response.json();
       
@@ -151,6 +164,8 @@ export default function MasterProduk() {
   const handleOpenEdit = (item) => {
     setIsEditing(true);
     setFormData({ ...item });
+    // Load konversi satuan dari data produk
+    setKonversi(item.konversi || []);
     setIsModalOpen(true);
   };
 
@@ -175,10 +190,10 @@ export default function MasterProduk() {
       render: (val) => <span className="font-semibold text-gray-900 dark:text-gray-100 tabular-nums">Rp {new Intl.NumberFormat('id-ID').format(val)}</span> 
     },
     { 
-      label: 'Satuan', 
-      key: 'nama_satuan',
+      label: 'Satuan Terkecil', 
+      key: 'nama_satuan_terkecil',
       align: 'center',
-      width: '100px',
+      width: '120px',
       render: (val) => <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">{val || '-'}</span>
     },
     { 
@@ -217,9 +232,17 @@ export default function MasterProduk() {
             kategori_1_id: '1', pajak: 'PPN', nie: '',
             kfa_code: '', kfa_name: '', drug_class: '-'
         });
-        setSatuanLainnya([]);
+        setKonversi([]); // reset konversi
     }
   };
+
+  // Helper untuk update baris konversi
+  const updateKonversi = (index, field, value) => {
+    setKonversi(prev => prev.map((k, i) => i === index ? { ...k, [field]: value } : k));
+  };
+  const addKonversi = () => setKonversi(prev => [...prev, { nama_satuan_beli: '', isi: 1, is_default_beli: false }]);
+  const removeKonversi = (index) => setKonversi(prev => prev.filter((_, i) => i !== index));
+
 
   return (
     <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
@@ -319,53 +342,97 @@ export default function MasterProduk() {
             </div>
           </div>
 
-          {/* Section 2: Logistics */}
+          {/* Section 2: Logistics & Konversi Satuan */}
           <div className="space-y-6">
             <div className="flex items-center gap-2 border-b border-gray-100 dark:border-gray-800 pb-3">
               <FiLayers className="text-primary-600" />
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Logistics & Packaging</h3>
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Logistics & Konversi Satuan</h3>
             </div>
 
             <div className="grid grid-cols-12 gap-6">
               <div className="col-span-12 lg:col-span-4 space-y-1.5">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Base Stock Unit</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Satuan Terkecil (Base Unit)</label>
                 <select 
                   name="satuan_utama_id"
                   value={formData.satuan_utama_id} 
                   onChange={handleInputChange}
                   className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all outline-none"
                 >
-                  <option value="1">Ampul</option>
-                  <option value="2">Box</option>
-                  <option value="3">Strip</option>
-                  <option value="4">Pcs</option>
+                  {satuanList.length > 0
+                    ? satuanList.map(s => <option key={s.id} value={s.id}>{s.nama_satuan}</option>)
+                    : <>
+                        <option value="1">Tablet</option>
+                        <option value="2">Kapsul</option>
+                        <option value="3">Ampul</option>
+                        <option value="4">Sachet</option>
+                        <option value="5">Botol</option>
+                      </>
+                  }
                 </select>
-                <p className="text-[10px] text-gray-500 font-medium italic mt-1.5">This unit will be used for all internal stock calculations.</p>
+                <p className="text-[10px] text-primary-600 font-semibold mt-1.5 bg-primary-50 px-2 py-1 rounded">
+                  ✓ Satuan ini dipakai untuk semua perhitungan stok internal.
+                </p>
               </div>
 
               <div className="col-span-12 lg:col-span-8 space-y-3">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Packaging Hierarchies</label>
-                <div className="space-y-3">
-                  {satuanLainnya.map((_, index) => (
-                    <div key={index} className="flex items-center gap-3 animate-in fade-in duration-300">
-                      <input type="number" className="w-16 bg-gray-50 border border-gray-300 rounded-lg px-2 py-2 text-sm text-center font-semibold outline-none" defaultValue="1" />
-                      <select className="flex-1 bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium outline-none">
-                        <option>BOX</option>
-                        <option>PACK</option>
-                      </select>
-                      <span className="text-xs text-gray-400">=</span>
-                      <input type="number" className="w-16 bg-gray-50 border border-gray-300 rounded-lg px-2 py-2 text-sm text-center font-semibold outline-none" defaultValue="10" />
-                      <div className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-semibold text-gray-500 min-w-[80px] text-center">
-                        {formData.satuan_utama_id === '1' ? 'Ampul' : 'Pcs'}
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Konversi Satuan Beli</label>
+                  <span className="text-[10px] text-gray-400 italic">Opsional: jika beli per strip/box</span>
+                </div>
+
+                {/* Header hint */}
+                {konversi.length === 0 && (
+                  <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                    <span className="text-amber-600 text-xs">💡</span>
+                    <p className="text-xs text-amber-700 font-medium">
+                      Tambah konversi jika obat dibeli dalam strip/box. Contoh: 1 Strip = 10 Tablet.
+                    </p>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {konversi.map((k, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 border border-gray-200 rounded-lg">
+                      <span className="text-xs text-gray-400 font-medium shrink-0">1</span>
+                      <input
+                        type="text"
+                        placeholder="Strip / Box / Dus"
+                        value={k.nama_satuan_beli}
+                        onChange={e => updateKonversi(index, 'nama_satuan_beli', e.target.value)}
+                        className="flex-1 bg-white border border-gray-300 rounded px-2 py-1.5 text-xs font-semibold outline-none focus:border-primary-500 min-w-0"
+                      />
+                      <span className="text-xs text-gray-400 font-medium shrink-0">=</span>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="10"
+                        value={k.isi}
+                        onChange={e => updateKonversi(index, 'isi', parseInt(e.target.value) || 1)}
+                        className="w-16 bg-white border border-gray-300 rounded px-2 py-1.5 text-xs font-bold text-center outline-none focus:border-primary-500"
+                      />
+                      <div className="px-2 py-1.5 bg-primary-50 border border-primary-200 rounded text-xs font-semibold text-primary-700 shrink-0">
+                        {satuanList.find(s => String(s.id) === String(formData.satuan_utama_id))?.nama_satuan || 'Satuan'}
                       </div>
-                      <button onClick={() => setSatuanLainnya(satuanLainnya.filter((_, i) => i !== index))} className="p-2 text-gray-400 hover:text-error-600 transition-colors"><FiTrash2 size={16} /></button>
+                      <label className="flex items-center gap-1 shrink-0 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={!!k.is_default_beli}
+                          onChange={e => updateKonversi(index, 'is_default_beli', e.target.checked)}
+                          className="w-3 h-3 accent-primary-600"
+                        />
+                        <span className="text-[10px] text-gray-500">Default</span>
+                      </label>
+                      <button onClick={() => removeKonversi(index)} className="p-1 text-gray-300 hover:text-red-500 transition-colors shrink-0">
+                        <FiTrash2 size={13} />
+                      </button>
                     </div>
                   ))}
+
                   <button 
-                    onClick={() => setSatuanLainnya([...satuanLainnya, {}])}
-                    className="inline-flex items-center gap-2 text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors"
+                    onClick={addKonversi}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors mt-1"
                   >
-                    <FiPlus size={14} /> Add conversion level
+                    <FiPlus size={13} /> Tambah Konversi Satuan
                   </button>
                 </div>
               </div>

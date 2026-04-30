@@ -50,6 +50,46 @@ class PenjualanController extends BaseController
     }
 
     /**
+     * GET /api/master/penjualan/tertolak
+     * List all rejected sales
+     */
+    public function get_tertolak()
+    {
+        $db = \Config\Database::connect();
+        
+        $builder = $db->table('t_penjualan_tertolak as t')
+            ->select('t.*, p.nama_produk')
+            ->join('m_produk as p', 'p.id = t.produk_id', 'left');
+
+        $search = $this->request->getGet('search');
+        if ($search) {
+            $builder->like('p.nama_produk', $search);
+        }
+
+        $data = $builder->orderBy('t.tanggal', 'DESC')->get()->getResultArray();
+
+        return $this->respond([
+            'status' => true,
+            'data'   => $data,
+        ]);
+    }
+
+    /**
+     * DELETE /api/master/penjualan/tertolak/:id
+     * Delete a rejected sale log
+     */
+    public function delete_tertolak($id = null)
+    {
+        $db = \Config\Database::connect();
+        $deleted = $db->table('t_penjualan_tertolak')->where('id', $id)->delete();
+        
+        if ($deleted) {
+            return $this->respond(['status' => true, 'message' => 'Log tertolak berhasil dihapus']);
+        }
+        return $this->respond(['status' => false, 'message' => 'Gagal menghapus log'], 500);
+    }
+
+    /**
      * GET /api/master/penjualan
      * List all sales with optional filters
      */

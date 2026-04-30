@@ -15,7 +15,7 @@ export default function PenjualanRetur() {
 
   const fetchData = (searchQ = '') => {
     setLoading(true);
-    const params = new URLSearchParams({ status: 'Dibatalkan' });
+    const params = new URLSearchParams({ status: 'Retur' });
     if (searchQ) params.set('search', searchQ);
     fetch(`${API_BASE}/master/penjualan?${params}`)
       .then(r => r.json())
@@ -108,7 +108,7 @@ export default function PenjualanRetur() {
                   <td className="py-2.5 px-3 text-xs font-medium text-gray-700 dark:text-gray-300">{row.nama_pelanggan || 'Umum'}</td>
                   <td className="py-2.5 px-3 text-xs text-gray-500">{row.jenis_pembayaran}</td>
                   <td className="py-2.5 px-3 text-xs font-bold text-red-500 tabular-nums text-right">{fmt(row.total_bayar)}</td>
-                  <td className="py-2.5 px-3"><span className="text-[10px] font-bold px-2 py-0.5 rounded bg-red-50 text-red-500 border border-red-200">Dibatalkan</span></td>
+                  <td className="py-2.5 px-3"><span className="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-50 text-amber-600 border border-amber-200">Retur</span></td>
                   <td className="py-2.5 px-3">
                     <button onClick={() => openDetail(row.id)} className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all" title="Lihat Detail">
                       <FiEye size={14} />

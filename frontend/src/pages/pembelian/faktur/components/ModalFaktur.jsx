@@ -97,6 +97,9 @@ export default function ModalFaktur({ isOpen, onClose, onSaveSuccess }) {
       nama_produk: product.nama_produk,
       satuan_id: product.satuan_utama_id,
       qty: 1,
+      satuan_beli: '',            // satuan beli (Strip/Box), kosong = satuan terkecil
+      satuan_terkecil: product.nama_satuan || 'satuan',
+      konversi_list: product.konversi || [], // konversi yang tersedia untuk produk ini
       no_batch: '',
       tanggal_expired: '',
       harga_beli: parseFloat(product.harga_beli_referensi) || 0,
@@ -110,6 +113,17 @@ export default function ModalFaktur({ isOpen, onClose, onSaveSuccess }) {
   const updateItem = (index, field, value) => {
     const newItems = [...items];
     newItems[index][field] = value;
+
+    // Jika satuan_beli berubah, update harga_beli sesuai konversi
+    if (field === 'satuan_beli') {
+      const konv = newItems[index].konversi_list?.find(k => k.nama_satuan_beli === value);
+      if (konv && konv.isi > 1) {
+        // Harga per satuan beli = harga terkecil × isi
+        // (user biasanya input harga per strip/box, bukan per tablet)
+        // Tidak auto-ubah harga, biarkan user input manual
+      }
+    }
+
     if (field === 'qty' || field === 'harga_beli') {
         newItems[index].subtotal = newItems[index].qty * newItems[index].harga_beli;
     }
@@ -283,29 +297,56 @@ export default function ModalFaktur({ isOpen, onClose, onSaveSuccess }) {
                 <table className="w-full text-xs">
                     <thead>
                         <tr className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-800">
-                            <th className="px-4 py-3 text-left font-bold uppercase tracking-tight text-[10px] text-gray-400">Inventory Specification</th>
-                            <th className="px-4 py-3 text-center font-bold uppercase tracking-tight text-[10px] text-gray-400 w-24">Quantity</th>
-                            <th className="px-4 py-3 text-left font-bold uppercase tracking-tight text-[10px] text-gray-400 w-48">Lot & Integrity</th>
-                            <th className="px-4 py-3 text-left font-bold uppercase tracking-tight text-[10px] text-gray-400 w-32">Acq. Cost</th>
-                            <th className="px-4 py-3 text-right font-bold uppercase tracking-tight text-[10px] text-gray-400">Aggregate</th>
+                            <th className="px-4 py-3 text-left font-bold uppercase tracking-tight text-[10px] text-gray-400">Produk</th>
+                            <th className="px-4 py-3 text-center font-bold uppercase tracking-tight text-[10px] text-gray-400 w-24">Qty</th>
+                            <th className="px-4 py-3 text-left font-bold uppercase tracking-tight text-[10px] text-gray-400 w-36">Satuan Beli</th>
+                            <th className="px-4 py-3 text-left font-bold uppercase tracking-tight text-[10px] text-gray-400 w-48">Batch & Expired</th>
+                            <th className="px-4 py-3 text-left font-bold uppercase tracking-tight text-[10px] text-gray-400 w-32">Harga/Satuan Beli</th>
+                            <th className="px-4 py-3 text-right font-bold uppercase tracking-tight text-[10px] text-gray-400">Subtotal</th>
                             <th className="px-4 py-3"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                         {items.length === 0 ? (
                             <tr>
-                                <td colSpan="6" className="px-4 py-20 text-center text-gray-400 font-medium italic text-xs uppercase tracking-widest bg-gray-50/20">
+                                <td colSpan="7" className="px-4 py-20 text-center text-gray-400 font-medium italic text-xs uppercase tracking-widest bg-gray-50/20">
                                    Awaiting Asset Entry Data...
                                 </td>
                             </tr>
                         ) : (
-                            items.map((item, idx) => (
+                            items.map((item, idx) => {
+                              // Hitung preview konversi
+                              const konv = item.konversi_list?.find(k => k.nama_satuan_beli === item.satuan_beli);
+                              const isi = konv ? konv.isi : 1;
+                              const qtyTerkecil = item.qty * isi;
+                              const showKonversi = isi > 1;
+
+                              return (
                                 <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-gray-800 transition-colors group">
                                     <td className="px-4 py-4">
                                         <div className="font-bold text-gray-800 dark:text-gray-100 uppercase text-xs tracking-tight">{item.nama_produk}</div>
+                                        {showKonversi && (
+                                          <div className="text-[10px] text-primary-600 font-semibold mt-0.5">
+                                            → {item.qty} {item.satuan_beli} × {isi} = <b>{qtyTerkecil}</b> {item.satuan_terkecil}
+                                          </div>
+                                        )}
                                     </td>
                                     <td className="px-4 py-4 text-center">
-                                        <input type="number" value={item.qty} onChange={(e) => updateItem(idx, 'qty', parseInt(e.target.value) || 0)} className="w-[80px] bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded px-2 py-1.5 text-xs font-bold text-center outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all dark:text-white" />
+                                        <input type="number" value={item.qty} onChange={(e) => updateItem(idx, 'qty', parseInt(e.target.value) || 0)} className="w-[70px] bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded px-2 py-1.5 text-xs font-bold text-center outline-none focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 transition-all dark:text-white" />
+                                    </td>
+                                    <td className="px-4 py-4">
+                                        <select
+                                          value={item.satuan_beli}
+                                          onChange={e => updateItem(idx, 'satuan_beli', e.target.value)}
+                                          className="w-full bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-700 rounded px-2 py-1.5 text-xs font-semibold outline-none focus:border-primary-500 transition-all"
+                                        >
+                                          <option value="">{item.satuan_terkecil || 'Satuan Terkecil'}</option>
+                                          {(item.konversi_list || []).map((k, ki) => (
+                                            <option key={ki} value={k.nama_satuan_beli}>
+                                              {k.nama_satuan_beli} ({k.isi} {item.satuan_terkecil})
+                                            </option>
+                                          ))}
+                                        </select>
                                     </td>
                                     <td className="px-4 py-4">
                                         <div className="space-y-1.5">
@@ -332,7 +373,8 @@ export default function ModalFaktur({ isOpen, onClose, onSaveSuccess }) {
                                         <button onClick={() => removeItem(idx)} className="p-2 text-gray-300 hover:text-error-600 hover:bg-error-50 dark:hover:bg-error-900/20 rounded transition-all"><FiTrash2 size={16} /></button>
                                     </td>
                                 </tr>
-                            ))
+                              );
+                            })
                         )}
                     </tbody>
                 </table>

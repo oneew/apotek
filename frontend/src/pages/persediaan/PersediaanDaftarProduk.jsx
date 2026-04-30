@@ -48,7 +48,7 @@ export default function PersediaanDaftarProduk() {
          <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-tight">{val || 'W-MAIN'}</span>
        </div>
     )},
-    { label: 'Stock Balance', key: 'stok_total', width: '150px', render: (val, row) => {
+    { label: 'Stock Balance', key: 'stok_total', width: '160px', render: (val, row) => {
       const isLow = row.stok_minimal > 0 && val <= row.stok_minimal;
       return (
         <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ export default function PersediaanDaftarProduk() {
               ? 'bg-error-50 text-error-700 border border-error-100 dark:bg-error-950/20 dark:border-error-900' 
               : 'bg-success-50 text-success-700 border border-success-100 dark:bg-success-950/20 dark:border-success-900'
           }`}>
-            {val} <span className="text-[10px] opacity-60 ml-0.5">{row.satuan || 'UNIT'}</span>
+            {val} <span className="text-[10px] opacity-80 ml-0.5 font-bold">{row.nama_satuan_terkecil || 'unit'}</span>
           </span>
           {isLow && <FiAlertCircle size={14} className="text-error-500" />}
         </div>

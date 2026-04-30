@@ -18,12 +18,18 @@ export default function PenjualanDaftar() {
   const [isReturModalOpen, setIsReturModalOpen] = useState(false);
   const [saleToReturn, setSaleToReturn] = useState(null);
   const [filterTanggal, setFilterTanggal] = useState('Semua');
+  const [selectedDateFrom, setSelectedDateFrom] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDateTo, setSelectedDateTo] = useState(new Date().toISOString().split('T')[0]);
 
-  const fetchData = (searchQ = search, filterT = filterTanggal) => {
+  const fetchData = (searchQ = search, filterT = filterTanggal, dateF = selectedDateFrom, dateT = selectedDateTo) => {
     setLoading(true);
     const params = new URLSearchParams();
     if (searchQ) params.set('search', searchQ);
-    if (filterT !== 'Semua') params.set('filter_tanggal', filterT);
+    if (filterT !== 'Semua' && filterT !== 'Rentang') params.set('filter_tanggal', filterT);
+    if (filterT === 'Rentang') {
+      params.set('date_from', dateF);
+      params.set('date_to', dateT);
+    }
     
     fetch(`${API_BASE}/master/penjualan?${params}`)
       .then(r => r.json())
@@ -38,12 +44,12 @@ export default function PenjualanDaftar() {
   };
 
   useEffect(() => { 
-    fetchData(search, filterTanggal); 
-  }, [filterTanggal]);
+    fetchData(search, filterTanggal, selectedDateFrom, selectedDateTo); 
+  }, [filterTanggal, selectedDateFrom, selectedDateTo]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchData(search, filterTanggal);
+    fetchData(search, filterTanggal, selectedDateFrom, selectedDateTo);
   };
 
   const openDetail = (id) => {
@@ -194,8 +200,26 @@ export default function PenjualanDaftar() {
               <option value="Minggu ini">Minggu ini</option>
               <option value="Bulan ini">Bulan ini</option>
               <option value="Tahun ini">Tahun ini</option>
+              <option value="Rentang">Pilih Rentang Tanggal</option>
             </select>
-            <button onClick={() => fetchData(search, filterTanggal)} className="p-2 text-gray-400 hover:text-primary-500 hover:bg-primary-50 rounded-lg border border-gray-200 dark:border-gray-800 transition-all" title="Refresh">
+            {filterTanggal === 'Rentang' && (
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="date"
+                  value={selectedDateFrom}
+                  onChange={e => setSelectedDateFrom(e.target.value)}
+                  className="px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-xs font-bold text-gray-600 outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-300"
+                />
+                <span className="text-gray-400 font-bold">-</span>
+                <input
+                  type="date"
+                  value={selectedDateTo}
+                  onChange={e => setSelectedDateTo(e.target.value)}
+                  className="px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-xs font-bold text-gray-600 outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-300"
+                />
+              </div>
+            )}
+            <button onClick={() => fetchData(search, filterTanggal, selectedDateFrom, selectedDateTo)} className="p-2 text-gray-400 hover:text-primary-500 hover:bg-primary-50 rounded-lg border border-gray-200 dark:border-gray-800 transition-all" title="Refresh">
               <FiRefreshCw size={14} />
             </button>
           </div>

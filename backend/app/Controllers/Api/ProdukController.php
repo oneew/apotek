@@ -14,13 +14,24 @@ class ProdukController extends BaseController
 
     public function index()
     {
-        $model = new ProdukModel();
-        // Join ke master data + stok untuk menampilkan info lengkap
-        $data = $model->select('m_produk.*, m_satuan.nama_satuan, m_kategori.nama_kategori, COALESCE(stok.stok_total, 0) as stok_total')
-                      ->join('m_satuan', 'm_satuan.id = m_produk.satuan_utama_id', 'left')
-                      ->join('m_kategori', 'm_kategori.id = m_produk.kategori_1_id', 'left')
-                      ->join('(SELECT produk_id, SUM(stok_tersedia) as stok_total FROM t_stok_batch GROUP BY produk_id) stok', 'stok.produk_id = m_produk.id', 'left')
-                      ->findAll();
+        $db = \Config\Database::connect();
+
+        // Join ke master data + stok untuk menampilkan info lengkap, termasuk satuan terkecil
+        $data = $db->table('m_produk')
+            ->select('m_produk.*, m_satuan.nama_satuan, m_satuan.nama_satuan as nama_satuan_terkecil, m_kategori.nama_kategori, COALESCE(stok.stok_total, 0) as stok_total')
+            ->join('m_satuan', 'm_satuan.id = m_produk.satuan_utama_id', 'left')
+            ->join('m_kategori', 'm_kategori.id = m_produk.kategori_1_id', 'left')
+            ->join('(SELECT produk_id, SUM(stok_tersedia) as stok_total FROM t_stok_batch GROUP BY produk_id) stok', 'stok.produk_id = m_produk.id', 'left')
+            ->get()->getResultArray();
+
+        // Lampirkan data konversi satuan untuk setiap produk
+        foreach ($data as &$produk) {
+            $produk['konversi'] = $db->table('m_produk_konversi')
+                ->where('produk_id', $produk['id'])
+                ->orderBy('is_default_beli', 'DESC')
+                ->orderBy('isi', 'ASC')
+                ->get()->getResultArray();
+        }
 
         return $this->respond([
             'status' => true,
@@ -65,14 +76,31 @@ class ProdukController extends BaseController
             'is_wajib_resep' => (isset($data['resep_wajib']) && $data['resep_wajib'] === 'Wajib') ? 'ya' : 'tidak',
             'is_tampil_katalog' => (isset($data['katalog_online']) && $data['katalog_online'] === 'Sembunyikan') ? 'tidak' : 'ya',
             
+            'harga_jual_utama' => !empty($data['harga_jual_utama']) ? $data['harga_jual_utama'] : 0,
             'zat_aktif' => $data['zat_aktif'] ?? null,
             'bentuk_sediaan' => $data['bentuk_sediaan'] ?? null,
         ];
 
         try {
+            $db = \Config\Database::connect();
             if ($id) {
                 $model->update($id, (object)$insertData);
                 $this->logActivity('Master Produk', 'Update produk: ' . $insertData['nama_produk'], $id, $insertData);
+
+                // Simpan konversi satuan jika ada
+                if (!empty($data['konversi']) && is_array($data['konversi'])) {
+                    $db->table('m_produk_konversi')->where('produk_id', $id)->delete();
+                    foreach ($data['konversi'] as $k) {
+                        if (empty($k['nama_satuan_beli']) || empty($k['isi'])) continue;
+                        $db->table('m_produk_konversi')->insert([
+                            'produk_id'        => (int) $id,
+                            'nama_satuan_beli' => trim($k['nama_satuan_beli']),
+                            'isi'              => (int) $k['isi'],
+                            'is_default_beli'  => !empty($k['is_default_beli']) ? 1 : 0,
+                        ]);
+                    }
+                }
+
                 return $this->respond([
                     'status'  => true,
                     'message' => 'Produk berhasil diupdate'
@@ -80,6 +108,20 @@ class ProdukController extends BaseController
             } else {
                 $newId = $model->insert((object)$insertData);
                 $this->logActivity('Master Produk', 'Tambah produk baru: ' . $insertData['nama_produk'], $newId, $insertData);
+
+                // Simpan konversi satuan jika ada
+                if (!empty($data['konversi']) && is_array($data['konversi'])) {
+                    foreach ($data['konversi'] as $k) {
+                        if (empty($k['nama_satuan_beli']) || empty($k['isi'])) continue;
+                        $db->table('m_produk_konversi')->insert([
+                            'produk_id'        => (int) $newId,
+                            'nama_satuan_beli' => trim($k['nama_satuan_beli']),
+                            'isi'              => (int) $k['isi'],
+                            'is_default_beli'  => !empty($k['is_default_beli']) ? 1 : 0,
+                        ]);
+                    }
+                }
+
                 return $this->respondCreated([
                     'status'  => true,
                     'message' => 'Produk berhasil ditambahkan',

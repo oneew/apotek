@@ -191,7 +191,14 @@ export default function PenjualanKasir() {
     ? products.filter(p => p.nama_produk?.toLowerCase().includes(searchQuery.toLowerCase()) || (p.sku && p.sku.toLowerCase().includes(searchQuery.toLowerCase())) || (p.barcode && p.barcode.includes(searchQuery))).slice(0, 8)
     : [];
 
-  const getHargaJual = (product) => { const hargaBeli = parseFloat(product.harga_beli_referensi) || 0; return Math.ceil(hargaBeli * 1.3 / 100) * 100; };
+  const getHargaJual = (product) => {
+    // Gunakan harga_jual_utama jika sudah diset, jika belum hitung 30% markup
+    if (product.harga_jual_utama && parseFloat(product.harga_jual_utama) > 0) {
+      return parseFloat(product.harga_jual_utama);
+    }
+    const hargaBeli = parseFloat(product.harga_beli_referensi) || 0;
+    return Math.ceil(hargaBeli * 1.3 / 100) * 100;
+  };
 
   const selectProduct = (product) => {
     const stok = parseInt(product.stok_total) || 0;
@@ -214,7 +221,13 @@ export default function PenjualanKasir() {
       }); 
       return; 
     }
-    addToCart({ id: product.id, name: product.nama_produk, sku: product.sku || product.barcode, price: getHargaJual(product), unit: product.nama_satuan || 'Pcs' });
+    addToCart({
+      id: product.id,
+      name: product.nama_produk,
+      sku: product.sku || product.barcode,
+      price: getHargaJual(product),
+      unit: product.nama_satuan_terkecil || product.nama_satuan || 'Pcs'
+    });
     setSearchQuery(''); setShowDropdown(false); setHighlightIndex(-1); searchInputRef.current?.focus();
   };
 
@@ -365,11 +378,13 @@ export default function PenjualanKasir() {
                       <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${stokHabis ? 'bg-red-50 text-red-400' : 'bg-primary-50 text-primary-500'}`}><FiPackage size={13} /></div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-semibold text-gray-900 truncate">{product.nama_produk}</div>
-                        <div className="flex items-center gap-1.5"><span className="text-[10px] text-gray-400">{product.sku || '-'}</span><span className="text-[10px] text-gray-300">•</span><span className="text-[10px] text-gray-400">{product.nama_satuan || '-'}</span></div>
+                        <div className="flex items-center gap-1.5"><span className="text-[10px] text-gray-400">{product.sku || '-'}</span><span className="text-[10px] text-gray-300">•</span><span className="text-[10px] text-gray-400">{product.nama_satuan_terkecil || product.nama_satuan || '-'}</span></div>
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-xs font-bold text-primary-600">Rp {harga.toLocaleString('id-ID')}</div>
-                        <div className={`text-[10px] font-bold ${stokHabis ? 'text-red-500' : stok <= 5 ? 'text-amber-500' : 'text-green-500'}`}>Stok: {stok}</div>
+                        <div className={`text-[10px] font-bold ${stokHabis ? 'text-red-500' : stok <= 5 ? 'text-amber-500' : 'text-green-500'}`}>
+                          Stok: {stok} {product.nama_satuan_terkecil || product.nama_satuan || ''}
+                        </div>
                       </div>
                     </button>
                   );
@@ -428,7 +443,7 @@ export default function PenjualanKasir() {
             <table className="w-full text-left border-separate border-spacing-0">
               <thead className="sticky top-0 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm z-10">
                 <tr>
-                  {['No', 'Produk', 'Jumlah', 'Satuan', 'Harga', 'Subtotal', ''].map((h, i) => (
+                  {['No', 'Produk', 'Jumlah', 'Satuan Terkecil', 'Harga', 'Subtotal', ''].map((h, i) => (
                     <th key={i} className={`px-4 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-wider border-b border-gray-100 dark:border-gray-800 ${i === 6 ? 'w-10' : ''}`}>{h}</th>
                   ))}
                 </tr>

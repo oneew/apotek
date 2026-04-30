@@ -16,8 +16,18 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($
     // Public routes for data
     $routes->get('produk', 'ProdukController::index');
     $routes->post('produk', 'ProdukController::create');
+    $routes->put('produk/(:num)', 'ProdukController::create/$1');
+    $routes->delete('produk/(:num)', 'ProdukController::delete/$1');
     $routes->get('inventory/forecasting', 'ProdukController::forecasting');
     $routes->post('inventory/forecasting/sync', 'ProdukController::syncForecasting');
+
+    // Konversi Satuan Routes
+    $routes->get('produk/konversi/(:num)', 'ProdukKonversiController::getByProduk/$1');
+    $routes->post('produk/konversi/(:num)', 'ProdukKonversiController::create/$1');
+    $routes->post('produk/konversi/batch/(:num)', 'ProdukKonversiController::saveBatch/$1');
+    $routes->put('produk/konversi/item/(:num)', 'ProdukKonversiController::update/$1');
+    $routes->delete('produk/konversi/item/(:num)', 'ProdukKonversiController::delete/$1');
+
     
     // Dashboard API
     $routes->get('dashboard/summary', 'DashboardController::summary');
@@ -41,6 +51,8 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($
         $routes->post('roles/permissions/(:num)', 'RoleController::update_permissions/$1');
         $routes->resource('penjualan', ['controller' => 'PenjualanController']);
         $routes->post('penjualan/log-tertolak', 'PenjualanController::log_tertolak');
+        $routes->get('penjualan-tertolak', 'PenjualanController::get_tertolak');
+        $routes->delete('penjualan-tertolak/(:num)', 'PenjualanController::delete_tertolak/$1');
         $routes->post('penjualan/retur', 'PenjualanController::retur');
         $routes->post('penjualan/restore/(:num)', 'PenjualanController::restore/$1');
         $routes->get('pelanggan', 'PelangganController::index');

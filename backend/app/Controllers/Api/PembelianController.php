@@ -42,10 +42,13 @@ class PembelianController extends BaseController
         }
 
         $detailModel = new PembelianDetailModel();
-        $details = $detailModel->select('t_pembelian_detail.*, m_produk.nama_produk')
-                               ->join('m_produk', 'm_produk.id = t_pembelian_detail.produk_id', 'left')
-                               ->where('pembelian_id', $id)
-                               ->findAll();
+        $db = \Config\Database::connect();
+        $details = $db->table('t_pembelian_detail d')
+            ->select('d.*, m_produk.nama_produk, m_satuan.nama_satuan as satuan_terkecil')
+            ->join('m_produk', 'm_produk.id = d.produk_id', 'left')
+            ->join('m_satuan', 'm_satuan.id = m_produk.satuan_utama_id', 'left')
+            ->where('d.pembelian_id', $id)
+            ->get()->getResultArray();
 
         return $this->respond([
             'status' => true,
@@ -86,6 +89,28 @@ class PembelianController extends BaseController
 
         // 2. Save Details & Update Stock (Only if Posted)
         foreach ($data['items'] as $item) {
+            // --- KONVERSI SATUAN TERKECIL ---
+            // Jika user memilih satuan beli (misal Strip), konversi ke satuan terkecil (Tablet)
+            $qtyBeli       = (int)($item['qty'] ?? 1);
+            $satuanBeli    = trim($item['satuan_beli'] ?? ''); // nama satuan beli, misal 'Strip'
+            $hargaBeli     = (float)($item['harga_beli'] ?? 0);
+            $qtyTerkecil   = $qtyBeli; // default: tidak ada konversi
+            $hargaTerkecil = $hargaBeli;
+
+            if (!empty($satuanBeli) && $satuanBeli !== 'satuan terkecil') {
+                // Cari konversi di database
+                $konversi = $db->table('m_produk_konversi')
+                    ->where('produk_id', $item['produk_id'])
+                    ->where('LOWER(nama_satuan_beli)', strtolower($satuanBeli))
+                    ->get()->getRowArray();
+
+                if ($konversi && $konversi['isi'] > 1) {
+                    $isi           = (int)$konversi['isi'];
+                    $qtyTerkecil   = $qtyBeli * $isi;   // misal: 2 Strip × 10 = 20 Tablet
+                    $hargaTerkecil = $hargaBeli / $isi;  // harga per Tablet
+                }
+            }
+
             // Fetch product info if satuan_id is missing
             $satuanId = $item['satuan_id'] ?? null;
             if (!$satuanId) {
@@ -94,13 +119,16 @@ class PembelianController extends BaseController
                 $satuanId = $pInfo['satuan_utama_id'] ?? 1;
             }
 
-            // Save Detail
+            // Save Detail — simpan qty dalam satuan terkecil, catat satuan_beli & isi_konversi
             $detailModel->insert((object)[
                 'pembelian_id'          => $pembelianId,
                 'produk_id'             => (int)$item['produk_id'],
                 'satuan_id'             => (int)$satuanId,
-                'jumlah_beli'           => $item['qty'],
-                'harga_beli_per_satuan' => $item['harga_beli'],
+                'jumlah_beli'           => $qtyBeli,       // jumlah dalam satuan beli (informasi)
+                'jumlah_terkecil'       => $qtyTerkecil,   // qty yang masuk stok (satuan terkecil)
+                'satuan_beli'           => $satuanBeli ?: null,
+                'isi_konversi'          => ($qtyTerkecil !== $qtyBeli) ? ($qtyTerkecil / max($qtyBeli, 1)) : 1,
+                'harga_beli_per_satuan' => $hargaTerkecil, // harga per satuan terkecil
                 'diskon'                => $item['diskon'] ?? 0,
                 'subtotal'              => $item['subtotal'],
                 'no_batch'              => $item['no_batch'],
@@ -109,7 +137,7 @@ class PembelianController extends BaseController
 
             // ONLY UPDATE STOCK IF STATUS IS POSTED
             if ($pembelianData['status'] === 'Posted') {
-                // Update/Create Stok Batch
+                // Update/Create Stok Batch menggunakan QTY SATUAN TERKECIL
                 $existingBatch = $stokBatchModel->where([
                     'produk_id' => $item['produk_id'],
                     'no_batch'  => $item['no_batch']
@@ -117,32 +145,32 @@ class PembelianController extends BaseController
 
                 if ($existingBatch) {
                     $stokBatchModel->update($existingBatch['id'], (object)[
-                        'stok_tersedia' => $existingBatch['stok_tersedia'] + $item['qty']
+                        'stok_tersedia' => $existingBatch['stok_tersedia'] + $qtyTerkecil
                     ]);
-                    $currentStok = $existingBatch['stok_tersedia'] + $item['qty'];
+                    $currentStok = $existingBatch['stok_tersedia'] + $qtyTerkecil;
                 } else {
                     $stokBatchModel->insert((object)[
                         'produk_id'       => (int)$item['produk_id'],
                         'no_batch'        => $item['no_batch'],
                         'tanggal_expired' => $item['tanggal_expired'],
-                        'stok_tersedia'   => (int)$item['qty'],
+                        'stok_tersedia'   => $qtyTerkecil,
                         'created_at'      => date('Y-m-d H:i:s')
                     ]);
-                    $currentStok = $item['qty'];
+                    $currentStok = $qtyTerkecil;
                 }
 
-                // Record and Kartu Stok
+                // Record and Kartu Stok (dalam satuan terkecil)
                 $resSum = $stokBatchModel->where('produk_id', $item['produk_id'])->selectSum('stok_tersedia')->first();
-                $totalStok = $resSum ? (int)$resSum['stok_tersedia'] : (int)$item['qty'];
+                $totalStok = $resSum ? (int)$resSum['stok_tersedia'] : $qtyTerkecil;
 
                 $kartuStokModel->insert((object)[
                     'produk_id'    => (int)$item['produk_id'],
                     'tanggal'      => date('Y-m-d H:i:s'),
                     'jenis_mutasi' => 'Masuk',
-                    'jumlah'       => (int)$item['qty'],
+                    'jumlah'       => $qtyTerkecil,
                     'sisa_stok'    => $totalStok,
                     'referensi'    => $pembelianData['no_faktur'],
-                    'keterangan'   => 'Pembelian dari Supplier'
+                    'keterangan'   => 'Pembelian dari Supplier' . ($satuanBeli ? " ({$qtyBeli} {$satuanBeli} → {$qtyTerkecil} satuan terkecil)" : '')
                 ]);
             }
         }
