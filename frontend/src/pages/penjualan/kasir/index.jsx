@@ -10,6 +10,7 @@ import ModalPilihPelanggan from './components/ModalPilihPelanggan';
 import ModalPilihDokter from './components/ModalPilihDokter';
 import ModalPembayaran from './components/ModalPembayaran';
 import ModalResepKasir from './components/ModalResepKasir';
+import FormResepModal from '../../pelayanan/penerimaan-resep/FormResepModal';
 import Swal from 'sweetalert2';
 import PrintWrapper from '../../../components/print/PrintWrapper';
 import ThermalReceipt from '../../../components/print/ThermalReceipt';
@@ -43,6 +44,7 @@ export default function PenjualanKasir() {
   const [selectedDokter, setSelectedDokter] = useState(null);
   const [isModalRacikanOpen, setIsModalRacikanOpen] = useState(false);
   const [isModalResepOpen, setIsModalResepOpen] = useState(false);
+  const [isFormResepOpen, setIsFormResepOpen] = useState(false);
   const [interactions, setInteractions] = useState([]);
   const [useBpjs, setUseBpjs] = useState(false);
 
@@ -50,13 +52,41 @@ export default function PenjualanKasir() {
   const [discountRp, setDiscountRp] = useState(0);
   const [fees, setFees] = useState({ service: 0, embalase: 0, other: 0 });
 
-  const fetchProducts = async () => {
+  const loadInitialData = async () => {
     try {
-      const response = await fetch(`${API_BASE}/produk`);
-      const result = await response.json();
-      if (result.status) setProducts(result.data);
-    } catch (err) { console.error('Gagal memuat produk:', err); }
+      const res = await fetch('http://localhost:8080/api/produk').then(r => r.json());
+      if (res.status) setProducts(res.data);
+    } catch(e) {}
   };
+
+  useEffect(() => {
+    loadInitialData();
+  }, []);
+
+  // Strategic Priority: Drug Interaction Check (application_strategic_analysis.md #4)
+  useEffect(() => {
+    const checkInteractions = async () => {
+      if (cart.length < 2) {
+        setInteractions([]);
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:8080/api/interaksi/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ produk_ids: cart.map(item => item.id) })
+        });
+        const result = await response.json();
+        if (result.status) setInteractions(result.interactions);
+      } catch (err) {
+        console.error('Interaction check failed:', err);
+      }
+    };
+
+    const timer = setTimeout(checkInteractions, 1000); // Debounce
+    return () => clearTimeout(timer);
+  }, [cart]);
 
   const fetchRiwayat = async () => {
     setIsLoadingRiwayat(true);
@@ -68,7 +98,10 @@ export default function PenjualanKasir() {
     finally { setIsLoadingRiwayat(false); }
   };
 
-  useEffect(() => { fetchProducts(); setTimeout(() => searchInputRef.current?.focus(), 100); }, []);
+  useEffect(() => { 
+    loadInitialData(); 
+    setTimeout(() => searchInputRef.current?.focus(), 100); 
+  }, []);
 
   const subTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const calcDiscount = discountPct > 0 ? (subTotal * discountPct / 100) : Number(discountRp);
@@ -120,12 +153,17 @@ export default function PenjualanKasir() {
 
   const onConfirmPayment = async ({ cashAmount: receivedAmount, paymentType, redeemPoints, redeemDiscount }) => {
     const finalGrandTotal = Math.max(0, grandTotal - (redeemDiscount || 0));
+    
+    // Check if any cart item came from swamedikasi
+    const swamedikasiItem = cart.find(i => i.swamedikasi_id);
+    
     const payload = {
       items: cart.map(item => ({ id: item.id, price: item.price, qty: item.qty })),
       subTotal, discountTotal: calcDiscount, grandTotal: finalGrandTotal,
       redeemDiscount, redeemPoints,
       cashAmount: receivedAmount || finalGrandTotal, paymentType,
-      pelanggan_id: selectedPelanggan?.id, dokter_id: selectedDokter?.id, notes: ''
+      pelanggan_id: selectedPelanggan?.id, dokter_id: selectedDokter?.id, notes: '',
+      swamedikasi_id: swamedikasiItem ? swamedikasiItem.swamedikasi_id : null
     };
     try {
       const response = await fetch(`${API_BASE}/master/penjualan`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -255,6 +293,34 @@ export default function PenjualanKasir() {
     } catch (e) { }
   };
 
+  const handleScanSwamedikasi = async (noSwa) => {
+    try {
+      const resp = await fetch(`${API_BASE}/master/swamedikasi/${noSwa}`);
+      const result = await resp.json();
+      if (result.status && result.data.items) {
+        if (result.data.pelanggan_id) setSelectedPelanggan({ id: result.data.pelanggan_id, nama: result.data.nama_pelanggan });
+        if (result.data.apoteker_id) setSelectedDokter({ id: result.data.apoteker_id, nama: result.data.nama_apoteker }); // mapping apoteker to dokter field temporarily or we can just leave it
+
+        setCart(result.data.items.map(item => ({
+          id: item.produk_id,
+          name: item.nama_produk,
+          sku: item.sku || `SWA-ITEM-${item.produk_id}`,
+          price: getHargaJual({
+            harga_jual_utama: item.harga_jual_utama,
+            harga_beli_referensi: item.harga_beli_referensi
+          }),
+          unit: item.nama_satuan_terkecil || item.nama_satuan || 'Pcs',
+          qty: parseInt(item.jumlah),
+          swamedikasi_id: result.data.id // keep track of swamedikasi_id
+        })));
+        setSearchQuery('');
+        Swal.fire({ title: 'Swamedikasi Ditemukan', text: `Data ${noSwa} berhasil dimuat.`, icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+      } else {
+        Swal.fire({ title: 'Data Tidak Ditemukan', text: result.message, icon: 'error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+      }
+    } catch (e) { }
+  };
+
   const handleSearchSubmit = (e) => {
     if (e.key === 'ArrowDown') { e.preventDefault(); setHighlightIndex(prev => Math.min(prev + 1, filteredProducts.length - 1)); return; }
     if (e.key === 'ArrowUp') { e.preventDefault(); setHighlightIndex(prev => Math.max(prev - 1, 0)); return; }
@@ -263,6 +329,10 @@ export default function PenjualanKasir() {
       e.preventDefault();
       if (searchQuery.trim().startsWith('RSP-')) {
         handleScanResep(searchQuery.trim());
+        return;
+      }
+      if (searchQuery.trim().startsWith('SWA-')) {
+        handleScanSwamedikasi(searchQuery.trim());
         return;
       }
       if (highlightIndex >= 0 && filteredProducts[highlightIndex]) { selectProduct(filteredProducts[highlightIndex]); return; }
@@ -403,8 +473,11 @@ export default function PenjualanKasir() {
           <button onClick={() => setIsModalRacikanOpen(true)} className="h-8 px-3 flex items-center gap-1.5 text-[11px] font-bold text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-800 hover:border-primary-500 rounded-lg transition-all">
             <FiLayers size={13} /><span className="hidden xl:inline">Racikan</span>
           </button>
+          <button onClick={() => setIsFormResepOpen(true)} className="h-8 px-3 flex items-center gap-1.5 text-[11px] font-bold text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-800 hover:border-primary-500 rounded-lg transition-all">
+            <FiPlus size={13} /><span className="hidden xl:inline">Input Resep Luar</span>
+          </button>
           <button onClick={() => setIsModalResepOpen(true)} className="h-8 px-3 flex items-center gap-1.5 text-[11px] font-bold text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-800 hover:border-primary-500 rounded-lg transition-all">
-            <FiFileText size={13} /><span className="hidden xl:inline">Tebus Resep</span>
+            <FiFileText size={13} /><span className="hidden xl:inline">Daftar Resep</span>
           </button>
           <button onClick={() => { setActiveView('riwayat'); fetchRiwayat(); }} className="h-8 px-3 flex items-center gap-1.5 text-[11px] font-bold text-gray-500 hover:text-primary-600 border border-gray-200 dark:border-gray-800 hover:border-primary-500 rounded-lg transition-all">
             <FiList size={13} /><span className="hidden xl:inline">Riwayat</span>
@@ -603,6 +676,15 @@ export default function PenjualanKasir() {
           qty: i.jumlah
         })));
       }} />
+
+      <FormResepModal 
+        isOpen={isFormResepOpen}
+        onClose={() => setIsFormResepOpen(false)}
+        defaultSumber="Kasir"
+        onSaved={(newId) => {
+          handleScanResep(newId);
+        }}
+      />
 
       <PrintWrapper ref={printRef}>
         <ThermalReceipt data={receiptData} />

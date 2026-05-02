@@ -31,6 +31,15 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($
     
     // Dashboard API
     $routes->get('dashboard/summary', 'DashboardController::summary');
+    $routes->get('dashboard/consolidated', 'DashboardController::consolidated');
+
+    // Clinical Safety & Interaction
+    $routes->post('interaksi/check', 'InteraksiController::checkInteraction');
+    $routes->post('interaksi/seed', 'InteraksiController::seedInteraksi');
+
+    // Audit & Cryptographic Trail
+    $routes->get('audit/logs', 'AuditTrailController::index');
+    $routes->get('audit/verify', 'AuditTrailController::verify');
 
     // Master Data Routes
     $routes->group('master', function($routes) {
@@ -52,14 +61,16 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($
         $routes->resource('penjualan', ['controller' => 'PenjualanController']);
         $routes->post('penjualan/log-tertolak', 'PenjualanController::log_tertolak');
         $routes->get('penjualan-tertolak', 'PenjualanController::get_tertolak');
+        $routes->post('penjualan-tertolak', 'PenjualanController::log_tertolak');
+        $routes->put('penjualan-tertolak/(:num)', 'PenjualanController::update_tertolak/$1');
         $routes->delete('penjualan-tertolak/(:num)', 'PenjualanController::delete_tertolak/$1');
         $routes->post('penjualan/retur', 'PenjualanController::retur');
         $routes->post('penjualan/restore/(:num)', 'PenjualanController::restore/$1');
-        $routes->get('pelanggan', 'PelangganController::index');
-        $routes->post('pelanggan', 'PelangganController::create');
-        $routes->get('dokter', 'DokterController::index');
-        $routes->post('dokter', 'DokterController::create');
+        $routes->resource('pelanggan', ['controller' => 'PelangganController']);
+        $routes->resource('dokter', ['controller' => 'DokterController']);
         $routes->resource('pembelian', ['controller' => 'PembelianController']);
+        $routes->resource('apoteker', ['controller' => 'ApotekerController']);
+        $routes->resource('pio', ['controller' => 'PioController']);
         $routes->get('rencana-pembelian/defecta', 'RencanaPembelianController::defecta');
         $routes->get('rencana-pembelian/analisis', 'RencanaPembelianController::analisis');
         $routes->resource('rencana-pembelian', ['controller' => 'RencanaPembelianController']);
@@ -89,11 +100,7 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($
         $routes->get('sipnap/laporan', 'SipnapController::generateLaporan');
         $routes->get('kpi/dashboard', 'KpiController::dashboard');
         
-        // Audit & Security Trail
-        $routes->get('audit/logs', 'AuditTrailController::index');
-        $routes->get('audit/verify', 'AuditTrailController::verify');
-        
-        $routes->get('hr/jadwal', 'HrController::getJadwal');
+        $routes->get('hr/pegawai', 'HrController::getPegawai');
         $routes->post('hr/jadwal', 'HrController::saveJadwal');
 
         // KPI & Dashboard
@@ -121,15 +128,15 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api'], static function ($
         $routes->get('resep', 'ResepController::index');
         $routes->post('resep', 'ResepController::create');
         $routes->get('resep/(:segment)', 'ResepController::show/$1');
+        $routes->put('resep/(:num)/status', 'ResepController::updateStatus/$1');
         $routes->get('resep/rekap/kasir', 'ResepController::index?sumber=Kasir'); // Alias for easier dev
         
-        
-        $routes->post('interaksi/check', 'InteraksiController::checkInteraction');
-        $routes->post('interaksi/seed', 'InteraksiController::seedInteraksi');
-
+        $routes->resource('kunjungan', ['controller' => 'KunjunganController']);
         $routes->get('fefo/dashboard', 'FefoController::dashboard');
         $routes->post('fefo/seed', 'FefoController::seedExpiry');
 
+        $routes->resource('penyesuaian-stok', ['controller' => 'PenyesuaianStokController']);
+        
         $routes->post('fefo/seed', 'FefoController::seedExpiry');
     });
     

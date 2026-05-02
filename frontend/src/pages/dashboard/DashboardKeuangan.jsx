@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { FiInfo, FiDollarSign, FiTrendingUp, FiTrendingDown, FiShoppingCart, FiTruck, FiCreditCard } from 'react-icons/fi';
-import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
 import DashboardCard from '../../components/ui/DashboardCard';
 import LinkCard from '../../components/ui/LinkCard';
@@ -9,14 +8,16 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 const API_BASE = 'http://localhost:8080/api';
 
-function RatioCard({ title, value, icon: Icon = FiInfo, color = 'text-gray-900' }) {
+function RatioCard({ title, value, icon: Icon = FiInfo, color = 'text-primary-600' }) {
   return (
-    <div className="bg-white dark:bg-[#1e1e24] border border-gray-200 dark:border-[#2a2a30] rounded-2xl p-5 hover:shadow-md transition-all">
+    <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 hover:shadow-md transition-all">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold text-gray-600 dark:text-gray-400">{title}</p>
-        <Icon className="text-gray-400 w-4 h-4 shrink-0" />
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">{title}</p>
+        <div className="w-8 h-8 bg-primary-50 dark:bg-primary-900/30 text-primary-600 rounded-lg flex items-center justify-center">
+          <Icon size={16} />
+        </div>
       </div>
-      <p className={`text-2xl font-extrabold ${color} dark:text-white tracking-tight`}>{value}</p>
+      <p className={`text-xl font-black ${color} dark:text-white tracking-tight`}>{value}</p>
     </div>
   );
 }
@@ -54,10 +55,7 @@ export default function DashboardKeuangan() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader
-        title="Dashboard Keuangan"
-        breadcrumbs={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Dashboard Keuangan' }]}
-      />
+      <SectionHeader title="Dashboard Keuangan" />
 
       {/* ─── Ringkasan Keuangan ──────────────────────────────── */}
       <SectionHeader title="Ringkasan Keuangan Bulanan">
@@ -66,20 +64,20 @@ export default function DashboardKeuangan() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <RatioCard title="Total Pemasukan (Penjualan)" value={loading ? '...' : formatCurrency(totalPemasukan)}
-          icon={FiTrendingUp} color="text-green-600" />
+          icon={FiTrendingUp} color="text-primary-600" />
         <RatioCard title="Total Pengeluaran (Pembelian)" value={loading ? '...' : formatCurrency(totalPembelian)}
-          icon={FiTrendingDown} color="text-red-500" />
+          icon={FiTrendingDown} color="text-primary-600" />
         <RatioCard title="Laba Kotor Estimasi" value={loading ? '...' : formatCurrency(labaBruto)}
-          icon={FiDollarSign} color={labaBruto >= 0 ? 'text-green-600' : 'text-red-500'} />
+          icon={FiDollarSign} color="text-primary-600" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <RatioCard title="Jumlah Transaksi" value={loading ? '...' : `${data?.sales?.month_count || 0} trx`}
-          icon={FiShoppingCart} color="text-blue-600" />
+          icon={FiShoppingCart} color="text-primary-600" />
         <RatioCard title="Rata-Rata per Transaksi" value={loading ? '...' : formatCurrency(data?.sales?.month_count > 0 ? totalPemasukan / data.sales.month_count : 0)}
-          icon={FiDollarSign} color="text-purple-600" />
+          icon={FiDollarSign} color="text-primary-600" />
         <RatioCard title="Rasio Laba Kotor" value={loading ? '...' : `${rasioLabaBruto}%`}
-          icon={FiInfo} color="text-teal-600" />
+          icon={FiInfo} color="text-primary-600" />
       </div>
 
       {/* ─── Info Cards ──────────────────────────────────────── */}
@@ -87,11 +85,11 @@ export default function DashboardKeuangan() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <DashboardCard label="Database Pelanggan" value={loading ? '...' : (data?.counts?.pelanggan || 0)}
-          icon={FiShoppingCart} iconBg="bg-teal-100 dark:bg-teal-900/30" iconColor="text-teal-600 dark:text-teal-400" />
+          icon={FiShoppingCart} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Database Supplier" value={loading ? '...' : (data?.counts?.supplier || 0)}
-          icon={FiTruck} iconBg="bg-red-100 dark:bg-red-900/30" iconColor="text-red-500 dark:text-red-400" />
+          icon={FiTruck} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Database Produk" value={loading ? '...' : (data?.counts?.produk || 0)}
-          icon={FiCreditCard} iconBg="bg-blue-100 dark:bg-blue-900/30" iconColor="text-blue-600 dark:text-blue-400" />
+          icon={FiCreditCard} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
       </div>
 
       {/* ─── Charts ──────────────────────────────────────────── */}
@@ -168,3 +166,4 @@ export default function DashboardKeuangan() {
     </div>
   );
 }
+

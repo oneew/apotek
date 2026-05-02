@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import PageHeader from '../../../components/ui/PageHeader';
+import SectionHeader from '../../../components/ui/SectionHeader';
 import Card from '../../../components/ui/Card';
 import ModalDialog from '../../../components/ui/ModalDialog';
 import { FiSearch, FiRefreshCw, FiDownload, FiEye, FiXCircle, FiFileText, FiCalendar, FiDollarSign, FiUser, FiCheckCircle, FiRefreshCcw, FiAlertTriangle } from 'react-icons/fi';
@@ -138,10 +138,9 @@ export default function PenjualanDaftar() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader
+      <SectionHeader
         title="Daftar Penjualan"
         subtitle="Riwayat semua transaksi penjualan apotek."
-        breadcrumbs={[{ label: 'Penjualan', path: '/penjualan' }, { label: 'Daftar Penjualan' }]}
       />
 
       {/* Summary Cards */}

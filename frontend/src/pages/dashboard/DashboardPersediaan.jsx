@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FiRefreshCw, FiShuffle, FiTrendingUp, FiShoppingBag, FiPackage, FiBox, FiAlertTriangle } from 'react-icons/fi';
-import PageHeader from '../../components/ui/PageHeader';
+import SectionHeader, { DateFilter } from '../../components/ui/SectionHeader';
 import Card from '../../components/ui/Card';
 import DashboardCard from '../../components/ui/DashboardCard';
 import StatusCard from '../../components/ui/StatusCard';
-import SectionHeader, { DateFilter } from '../../components/ui/SectionHeader';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const API_BASE = 'http://localhost:8080/api';
@@ -61,10 +60,7 @@ export default function DashboardPersediaan() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader
-        title="Dashboard Persediaan"
-        breadcrumbs={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Dashboard Persediaan' }]}
-      />
+      <SectionHeader title="Dashboard Persediaan" />
 
       {/* ─── Ringkasan Stok ──────────────────────────────────── */}
       <SectionHeader title="Ringkasan Persediaan">
@@ -73,20 +69,20 @@ export default function DashboardPersediaan() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
         <DashboardCard label="Total Produk Terdaftar" value={loading ? '...' : (data?.counts?.produk || 0)}
-          icon={FiPackage} iconBg="bg-blue-100 dark:bg-blue-900/30" iconColor="text-blue-600 dark:text-blue-400" />
+          icon={FiPackage} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Total Unit Stok" value={loading ? '...' : totalStokUnit.toLocaleString('id-ID')}
-          icon={FiBox} iconBg="bg-purple-100 dark:bg-purple-900/30" iconColor="text-purple-600 dark:text-purple-400" />
+          icon={FiBox} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Nilai Persediaan" value={loading ? '...' : formatCurrency(totalNilaiStok)}
-          icon={FiTrendingUp} iconBg="bg-green-100 dark:bg-green-900/30" iconColor="text-green-600 dark:text-green-400" />
+          icon={FiTrendingUp} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <DashboardCard label="Stok Cukup" value={loading ? '...' : stokCukup}
-          icon={FiPackage} iconBg="bg-green-100 dark:bg-green-900/30" iconColor="text-green-600 dark:text-green-400" />
+          icon={FiPackage} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Stok Rendah (≤10)" value={loading ? '...' : stokRendah}
-          icon={FiAlertTriangle} iconBg="bg-orange-100 dark:bg-orange-900/30" iconColor="text-orange-500 dark:text-orange-400" />
+          icon={FiAlertTriangle} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Stok Habis" value={loading ? '...' : stokHabis}
-          icon={FiRefreshCw} iconBg="bg-red-100 dark:bg-red-900/30" iconColor="text-red-500 dark:text-red-400" />
+          icon={FiRefreshCw} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
       </div>
 
       {/* ─── Chart & Produk Stok Rendah ──────────────────────── */}
@@ -163,3 +159,4 @@ export default function DashboardPersediaan() {
     </div>
   );
 }
+

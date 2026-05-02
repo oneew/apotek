@@ -15,9 +15,9 @@ class KonselingController extends ResourceController
         $db = \Config\Database::connect();
         
         $builder = $db->table('t_konseling as k')
-            ->select('k.*, p.nama_pelanggan, u.name as nama_apoteker')
+            ->select('k.*, p.nama_pelanggan, a.nama_apoteker')
             ->join('m_pelanggan as p', 'p.id = k.pelanggan_id', 'left')
-            ->join('users as u', 'u.id = k.apoteker_id', 'left');
+            ->join('m_apoteker as a', 'a.id = k.apoteker_id', 'left');
             
         $data = $builder->orderBy('k.tanggal_konseling', 'DESC')->get()->getResultArray();
         
@@ -33,10 +33,10 @@ class KonselingController extends ResourceController
             'pelanggan_id'      => $input['pelanggan_id'],
             'apoteker_id'       => $input['apoteker_id'],
             'tanggal_konseling' => $input['tanggal_konseling'] ?? date('Y-m-d H:i:s'),
-            'keluhan'           => $input['keluhan'],
-            'diagnosa_awal'     => $input['diagnosa_awal'] ?? '',
-            'saran_rekomendasi' => $input['saran_rekomendasi'] ?? '',
-            'tindakan_diambil'  => $input['tindakan_diambil'] ?? '',
+            'subjective'        => $input['subjective'] ?? '',
+            'objective'         => $input['objective'] ?? '',
+            'assessment'        => $input['assessment'] ?? '',
+            'plan'              => $input['plan'] ?? '',
             'catatan'           => $input['catatan'] ?? '',
             'created_at'        => date('Y-m-d H:i:s'),
         ];
@@ -57,12 +57,11 @@ class KonselingController extends ResourceController
             'pelanggan_id'      => $input['pelanggan_id'],
             'apoteker_id'       => $input['apoteker_id'],
             'tanggal_konseling' => $input['tanggal_konseling'] ?? date('Y-m-d H:i:s'),
-            'keluhan'           => $input['keluhan'],
-            'diagnosa_awal'     => $input['diagnosa_awal'] ?? '',
-            'saran_rekomendasi' => $input['saran_rekomendasi'] ?? '',
-            'tindakan_diambil'  => $input['tindakan_diambil'] ?? '',
+            'subjective'        => $input['subjective'] ?? '',
+            'objective'         => $input['objective'] ?? '',
+            'assessment'        => $input['assessment'] ?? '',
+            'plan'              => $input['plan'] ?? '',
             'catatan'           => $input['catatan'] ?? '',
-            'updated_at'        => date('Y-m-d H:i:s'),
         ];
         
         if ($db->table('t_konseling')->update($data, ['id' => $id])) {
@@ -76,9 +75,9 @@ class KonselingController extends ResourceController
     {
         $db = \Config\Database::connect();
         $builder = $db->table('t_konseling as k')
-            ->select('k.*, p.nama_pelanggan, u.name as nama_apoteker')
+            ->select('k.*, p.nama_pelanggan, a.nama_apoteker')
             ->join('m_pelanggan as p', 'p.id = k.pelanggan_id', 'left')
-            ->join('users as u', 'u.id = k.apoteker_id', 'left')
+            ->join('m_apoteker as a', 'a.id = k.apoteker_id', 'left')
             ->where('k.id', $id);
             
         $data = $builder->get()->getRowArray();

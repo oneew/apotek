@@ -33,4 +33,33 @@ class DokterController extends ResourceController
             'data'    => ['id' => $db->insertID()]
         ]);
     }
+
+    public function update($id = null)
+    {
+        $input = $this->request->getJSON(true);
+        $db = \Config\Database::connect();
+
+        $db->table('m_dokter')->where('id', $id)->update([
+            'nama_dokter'      => $input['nama_dokter'] ?? '',
+            'spesialisasi'     => $input['spesialisasi'] ?? 'Umum',
+            'no_izin_praktek'  => $input['no_izin_praktek'] ?? '',
+            'no_telepon'       => $input['no_telepon'] ?? '',
+        ]);
+
+        return $this->respond([
+            'status'  => true,
+            'message' => 'Data dokter berhasil diperbarui'
+        ]);
+    }
+
+    public function delete($id = null)
+    {
+        $db = \Config\Database::connect();
+        $db->table('m_dokter')->where('id', $id)->delete();
+
+        return $this->respond([
+            'status'  => true,
+            'message' => 'Dokter berhasil dihapus'
+        ]);
+    }
 }

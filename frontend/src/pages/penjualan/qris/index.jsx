@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PageHeader from '../../../components/ui/PageHeader';
+import SectionHeader from '../../../components/ui/SectionHeader';
 import Card from '../../../components/ui/Card';
 import { FiSearch, FiRefreshCw, FiDollarSign, FiCheckCircle, FiSmartphone, FiEye } from 'react-icons/fi';
 import ModalDialog from '../../../components/ui/ModalDialog';
@@ -45,10 +45,9 @@ export default function PenjualanQRIS() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader
+      <SectionHeader
         title="Transaksi QRIS"
         subtitle="Riwayat transaksi pembayaran melalui QRIS / E-Wallet."
-        breadcrumbs={[{ label: 'Penjualan', path: '/penjualan' }, { label: 'QRIS' }]}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">

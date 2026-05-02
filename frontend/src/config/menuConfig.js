@@ -27,6 +27,7 @@ export const menuTree = [
     icon: FiBarChart2,
     type: 'parent',
     children: [
+      { id: 'dash-consolidated', label: 'Owner Consolidated', path: '/manajemen-pengguna/consolidated', badge: 'PRO' },
       { id: 'dash-umum', label: 'Dashboard Umum', path: '/dashboard' },
       { id: 'dash-penjualan', label: 'Dashboard Penjualan', path: '/dashboard/penjualan' },
       { id: 'dash-pembelian', label: 'Dashboard Pembelian', path: '/dashboard/pembelian' },
@@ -58,6 +59,7 @@ export const menuTree = [
       { id: 'pemeriksaan', label: 'Pemeriksaan Awal', path: '/pelayanan/pemeriksaan-awal' },
       { id: 'terima-resep', label: 'Penerimaan Resep', path: '/pelayanan/penerimaan-resep' },
       { id: 'konseling', label: 'Konseling Apoteker', path: '/pelayanan/konseling', badge: 'NEW' },
+      { id: 'pio', label: 'Informasi Obat (PIO)', path: '/pelayanan/pio', badge: 'NEW' },
       { id: 'tebus-resep', label: 'Penebusan Resep', path: '/pelayanan/penebusan-resep' },
       { id: 'template-racik', label: 'Template Racikan', path: '/pelayanan/template-racikan' },
       { id: 'swamedikasi', label: 'Swamedikasi', path: '/pelayanan/swamedikasi' },
@@ -201,6 +203,7 @@ export const menuTree = [
     type: 'parent',
     children: [
       { id: 'master-pegawai', label: 'Master Pegawai', path: '/master/pegawai', badge: 'NEW' },
+      { id: 'master-apoteker', label: 'Master Apoteker', path: '/master/apoteker', badge: 'NEW' },
       { id: 'master-produk', label: 'Master Produk', path: '/master/produk' },
       { id: 'master-formula', label: 'Master Formula', path: '/master/formula', badge: 'NEW' },
       { id: 'master-kategori', label: 'Master Kategori', path: '/master/kategori' },

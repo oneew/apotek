@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import SectionHeader from '../../../components/ui/SectionHeader';
-import Card from '../../../components/ui/Card';
+import SectionHeader, { DateFilter } from '../../../components/ui/SectionHeader';
 import DataTable from '../../../components/ui/DataTable';
-import { FiActivity, FiUsers, FiPlus, FiMessageSquare, FiFileText, FiCalendar, FiUser } from 'react-icons/fi';
+import { FiActivity, FiUsers, FiPlus, FiMessageSquare, FiFileText, FiFilter } from 'react-icons/fi';
 import ModalKonseling from './components/ModalKonseling';
 
 export default function KonselingList() {
@@ -11,6 +10,7 @@ export default function KonselingList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterTanggal, setFilterTanggal] = useState('Hari ini');
 
   const fetchKonseling = async () => {
     setIsLoading(true);
@@ -59,8 +59,8 @@ export default function KonselingList() {
       render: (val) => <span className="font-semibold text-gray-700">{val || 'N/A'}</span>
     },
     {
-      key: 'keluhan',
-      label: 'Keluhan Utama',
+      key: 'subjective',
+      label: 'Subjective (S)',
       render: (val) => <div className="max-w-[200px] truncate italic text-gray-400 text-[11px] font-medium">{val || 'No notes...'}</div>
     },
     {
@@ -84,15 +84,14 @@ export default function KonselingList() {
   const filteredData = data.filter(item => 
     item.nama_pelanggan?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.nama_apoteker?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.keluhan?.toLowerCase().includes(searchQuery.toLowerCase())
+    item.subjective?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6 pb-12 px-4">
+    <div className="animate-unt-fade">
       <SectionHeader 
         title="Konseling Apoteker" 
         subtitle="Manajemen sesi konseling klinis antara apoteker dan pasien untuk optimasi terapi."
-        icon={<FiMessageSquare size={24} className="text-primary-500" />}
       >
         <button 
           onClick={() => { setSelectedId(null); setIsModalOpen(true); }}
@@ -102,39 +101,66 @@ export default function KonselingList() {
         </button>
       </SectionHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="flex items-center gap-4 p-5 border-none shadow-sm bg-white">
-          <div className="w-12 h-12 bg-primary-50 text-primary-500 rounded-xl flex items-center justify-center">
-            <FiActivity size={24} />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Total Sesi</p>
-            <p className="text-2xl font-black text-gray-900 mt-1">{data.length}</p>
-          </div>
-        </Card>
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-8 mb-6">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* Placeholder for any specific filter if needed, matching the layout of penerimaan-resep */}
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Filter Data:</label>
+          <select 
+            className="bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+          >
+            <option value="">Semua Konseling</option>
+            <option value="Selesai">Telah Selesai</option>
+          </select>
+        </div>
         
-        <Card className="flex items-center gap-4 p-5 border-none shadow-sm bg-white">
-          <div className="w-12 h-12 bg-success-50 text-success-500 rounded-xl flex items-center justify-center">
-            <FiUsers size={24} />
-          </div>
-          <div>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Pasien Dilayani</p>
-            <p className="text-2xl font-black text-gray-900 mt-1">
-              {[...new Set(data.map(d => d.pelanggan_id))].length}
-            </p>
-          </div>
-        </Card>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
+          <select 
+            value={filterTanggal} 
+            onChange={e => setFilterTanggal(e.target.value)}
+            className="text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-sm"
+          >
+            <option value="Semua">Semua Waktu</option>
+            <option value="Hari ini">Hari ini</option>
+            <option value="Bulan ini">Bulan ini</option>
+            <option value="Tahun ini">Tahun ini</option>
+          </select>
+          <button className="flex flex-row items-center gap-2 px-3 py-2 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-600 dark:text-gray-300 transition-colors whitespace-nowrap shadow-sm">
+            <FiFilter size={16} /> Filter Lanjutan
+            <span className="bg-primary-600 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{filterTanggal !== 'Semua' ? 1 : 0}</span>
+          </button>
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm overflow-hidden">
-        <DataTable 
-          columns={columns} 
-          data={filteredData} 
-          isLoading={isLoading}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          searchPlaceholder="Cari berdasarkan pasien, apoteker, atau keluhan..."
-        />
+      <DataTable 
+        columns={columns} 
+        data={filteredData} 
+        isLoading={isLoading}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Cari berdasarkan pasien, apoteker, atau keluhan..."
+      />
+
+      {/* Rekap Banner */}
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden mt-6 flex justify-between items-center">
+        <div className="p-5 flex items-center gap-4 border-l-4 border-primary-500">
+           <div>
+             <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Rekapitulasi Konseling</h4>
+             <p className="text-xs text-gray-500 dark:text-gray-400">Total interaksi apoteker dan pasien.</p>
+           </div>
+        </div>
+        <div className="p-5 flex items-center gap-6 pr-8">
+           <div className="text-center">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total Sesi</p>
+              <h3 className="text-xl font-black text-gray-900 dark:text-white">{data.length}</h3>
+           </div>
+           <div className="w-px h-10 bg-gray-200 dark:bg-gray-800"></div>
+           <div className="text-center">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Pasien Dilayani</p>
+              <h3 className="text-xl font-black text-primary-600">
+                {[...new Set(data.map(d => d.pelanggan_id))].length}
+              </h3>
+           </div>
+        </div>
       </div>
 
       <ModalKonseling 
@@ -146,3 +172,4 @@ export default function KonselingList() {
     </div>
   );
 }
+

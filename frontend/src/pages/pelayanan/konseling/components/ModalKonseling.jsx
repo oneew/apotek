@@ -11,10 +11,10 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
     tanggal_konseling: new Date().toISOString().slice(0, 16),
     pelanggan_id: '',
     apoteker_id: '',
-    keluhan: '',
-    diagnosa_awal: '',
-    saran_rekomendasi: '',
-    tindakan_diambil: '',
+    subjective: '',
+    objective: '',
+    assessment: '',
+    plan: '',
     catatan: ''
   });
 
@@ -29,10 +29,10 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
           tanggal_konseling: new Date().toISOString().slice(0, 16),
           pelanggan_id: '',
           apoteker_id: '',
-          keluhan: '',
-          diagnosa_awal: '',
-          saran_rekomendasi: '',
-          tindakan_diambil: '',
+          subjective: '',
+          objective: '',
+          assessment: '',
+          plan: '',
           catatan: ''
         });
       }
@@ -49,7 +49,7 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
 
   const fetchPharmacists = async () => {
     try {
-      const resp = await fetch('/api/master/hr/pegawai');
+      const resp = await fetch('/api/master/apoteker');
       const res = await resp.json();
       if (res.status) setPharmacists(res.data);
     } catch (e) { console.error(e); }
@@ -137,13 +137,13 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
     <ModalDialog 
       isOpen={isOpen} 
       onClose={onClose} 
-      title={id ? "Edit Sesi Konseling" : "Registrasi Sesi Konseling"} 
-      subtitle="Pendokumentasian intervensi klinis dan edukasi pasien oleh apoteker."
+      title={id ? "Edit Sesi Konseling (SOAP)" : "Registrasi Sesi Konseling (SOAP)"} 
+      subtitle="Pendokumentasian intervensi klinis menggunakan format SOAP."
       icon={<FiMessageSquare />}
-      maxWidth="max-w-[800px]"
+      maxWidth="max-w-[900px]"
     >
       <form onSubmit={handleSubmit} className="p-8 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-1.5 border-l-4 border-primary-500 pl-4">
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Tanggal & Waktu</label>
               <div className="relative">
@@ -159,7 +159,7 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
           </div>
 
           <div className="space-y-1.5 border-l-4 border-success-500 pl-4">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Pilih Pasien / Pelanggan</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Pasien / Pelanggan</label>
               <div className="relative">
                 <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <select 
@@ -175,7 +175,7 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
           </div>
 
           <div className="space-y-1.5 border-l-4 border-warning-500 pl-4">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Apoteker Pendamping</label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Apoteker Pemeriksa</label>
               <div className="relative">
                 <FiActivity className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <select 
@@ -185,7 +185,7 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
                   className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2 text-xs font-semibold focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all appearance-none"
                 >
                   <option value="">-- Pilih Apoteker --</option>
-                  {pharmacists.map(p => <option key={p.id} value={p.id}>{p.nama_lengkap}</option>)}
+                  {pharmacists.map(p => <option key={p.id} value={p.id}>{p.nama_apoteker}</option>)}
                 </select>
               </div>
           </div>
@@ -193,46 +193,58 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-100">
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Keluhan / Riwayat</label>
+            <div className="flex items-center gap-2 mb-1">
+               <span className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-[10px] font-black">S</span>
+               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Subjective (Keluhan Pasien)</label>
+            </div>
             <textarea 
-              name="keluhan" 
-              value={formData.keluhan} 
+              name="subjective" 
+              value={formData.subjective} 
               onChange={handleChange} 
-              placeholder="Keluhan utama pasien..." 
-              className="w-full h-24 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+              placeholder="Riwayat penyakit, keluhan utama, alergi obat..." 
+              className="w-full h-32 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
             ></textarea>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Diagnosa / Assessment Awal</label>
+            <div className="flex items-center gap-2 mb-1">
+               <span className="w-6 h-6 bg-success-100 text-success-600 rounded-full flex items-center justify-center text-[10px] font-black">O</span>
+               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Objective (Hasil Pemeriksaan)</label>
+            </div>
             <textarea 
-              name="diagnosa_awal" 
-              value={formData.diagnosa_awal} 
+              name="objective" 
+              value={formData.objective} 
               onChange={handleChange} 
-              placeholder="Hasil observasi apoteker..." 
-              className="w-full h-24 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+              placeholder="Tanda vital (TD, HR, RR, T), hasil laboratorium, fisik..." 
+              className="w-full h-32 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
             ></textarea>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Saran / Rekomendasi Terapi</label>
+            <div className="flex items-center gap-2 mb-1">
+               <span className="w-6 h-6 bg-warning-100 text-warning-600 rounded-full flex items-center justify-center text-[10px] font-black">A</span>
+               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Assessment (Analisa/Kesimpulan)</label>
+            </div>
             <textarea 
-              name="saran_rekomendasi" 
-              value={formData.saran_rekomendasi} 
+              name="assessment" 
+              value={formData.assessment} 
               onChange={handleChange} 
-              placeholder="Edukasi penggunaan obat..." 
-              className="w-full h-24 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+              placeholder="Drug Related Problems (DRP), diagnosa apoteker..." 
+              className="w-full h-32 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
             ></textarea>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Tindakan / Intervensi</label>
+            <div className="flex items-center gap-2 mb-1">
+               <span className="w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-[10px] font-black">P</span>
+               <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Plan (Rencana Terapi)</label>
+            </div>
             <textarea 
-              name="tindakan_diambil" 
-              value={formData.tindakan_diambil} 
+              name="plan" 
+              value={formData.plan} 
               onChange={handleChange} 
-              placeholder="Tindakan yang telah dilakukan..." 
-              className="w-full h-24 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
+              placeholder="Rekomendasi obat, dosis, cara pakai, edukasi..." 
+              className="w-full h-32 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-xs font-medium focus:ring-4 focus:ring-primary-500/10 focus:border-primary-500 outline-none transition-all"
             ></textarea>
           </div>
         </div>
@@ -262,7 +274,7 @@ export default function ModalKonseling({ isOpen, onClose, id, onSaveSuccess }) {
               disabled={isSubmitting}
               className="flex items-center gap-2 px-8 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-bold uppercase transition-all shadow-md shadow-primary-500/20 active:scale-95 disabled:opacity-50"
             >
-              <FiSave /> {isSubmitting ? 'Menyimpan...' : 'Simpan Sesi'}
+              <FiSave /> {isSubmitting ? 'Menyimpan...' : 'Simpan SOAP'}
             </button>
           </div>
         </div>

@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SectionHeader from '../../components/ui/SectionHeader';
 import DataTable from '../../components/ui/DataTable';
-import { FiAlertTriangle, FiAlertCircle, FiCheckCircle, FiClock, FiBox, FiBell } from 'react-icons/fi';
+import { FiAlertTriangle, FiAlertCircle, FiCheckCircle, FiClock, FiBox, FiBell, FiFileText } from 'react-icons/fi';
 import Swal from 'sweetalert2';
+import PrintWrapper from '../../components/print/PrintWrapper';
+import PickList from '../../components/print/PickList';
 
 export default function FefoDashboard() {
   const [data, setData] = useState({ counts: {}, details: { expired: [], critical: [], warning: [], safe: [] } });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('critical');
   const [searchQuery, setSearchQuery] = useState('');
+  const printRef = useRef(null);
 
   const loadData = async () => {
     setLoading(true);
@@ -23,6 +26,13 @@ export default function FefoDashboard() {
 
   const sendWaAlert = () => {
      Swal.fire('Alert Sent!', 'Laporan Kadaluarsa telah dikirimkan ke Whatsapp Manager.', 'success');
+  };
+
+  const handlePrintPickList = () => {
+    if (getTableData().length === 0) {
+      return Swal.fire('No Data', 'Tidak ada item dalam kategori ini untuk dicetak.', 'warning');
+    }
+    printRef.current.print();
   };
 
   const getTableData = () => {
@@ -54,9 +64,14 @@ export default function FefoDashboard() {
         subtitle="Analisis pergerakan obat berdasarkan First-Expired-First-Out dan peringatan kadaluarsa."
         icon={<FiClock size={24} className="text-gray-500" />}
         rightContent={
-          <button onClick={sendWaAlert} className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm font-bold text-sm transition-all">
-             <FiBell size={16} /> Broadcast WA Alert
-          </button>
+          <div className="flex items-center gap-3">
+            <button onClick={handlePrintPickList} className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg shadow-sm font-bold text-sm transition-all">
+               <FiFileText size={16} /> Print Pick List
+            </button>
+            <button onClick={sendWaAlert} className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm font-bold text-sm transition-all">
+               <FiBell size={16} /> Broadcast WA Alert
+            </button>
+          </div>
         }
       />
 
@@ -85,6 +100,9 @@ export default function FefoDashboard() {
              searchPlaceholder={`Cari obat dalam kategori ${activeTab.toUpperCase()}...`} 
           />
       </div>
+      <PrintWrapper ref={printRef}>
+        <PickList data={getTableData()} category={activeTab} />
+      </PrintWrapper>
     </div>
   );
 }

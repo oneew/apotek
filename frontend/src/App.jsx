@@ -20,14 +20,13 @@ import PelayananPemeriksaanAwal from './pages/pelayanan/pemeriksaan-awal';
 import PelayananPenerimaanResep from './pages/pelayanan/penerimaan-resep';
 import PelayananTemplateRacikan from './pages/pelayanan/template-racikan';
 import PelayananKonseling from './pages/pelayanan/konseling';
+import PelayananPio from './pages/pelayanan/pio';
 import PelayananPenebusanResep from './pages/pelayanan/penebusan-resep';
 import PelayananSwamedikasi from './pages/pelayanan/swamedikasi';
 
 import FormPemeriksaanAwal from './pages/pelayanan/pemeriksaan-awal/baru';
 import FormPenerimaanResep from './pages/pelayanan/penerimaan-resep/baru';
-import FormSwamedikasi from './pages/pelayanan/swamedikasi/baru';
-import FormPenebusanResep from './pages/pelayanan/penebusan-resep/baru';
-import FormTemplateRacikan from './pages/pelayanan/template-racikan/baru';
+
 
 import PersediaanDaftarProduk from './pages/persediaan/PersediaanDaftarProduk';
 import PersediaanDefecta from './pages/persediaan/PersediaanDefecta';
@@ -88,8 +87,10 @@ import SatusehatSettings from './pages/manajemen/SatusehatSettings';
 import WhatsappGateway from './pages/manajemen/WhatsappGateway';
 import PembelianOcr from './pages/pembelian/PembelianOcr';
 import SecurityMonitor from './pages/manajemen/SecurityMonitor';
+import ConsolidatedDashboard from './pages/manajemen/ConsolidatedDashboard';
 
 import MasterPegawai from './pages/manajemen/MasterPegawai';
+import MasterApoteker from './pages/master/MasterApoteker';
 import MasterProduk from './pages/master/MasterProduk';
 import MasterFormula from './pages/master/MasterFormula';
 import MasterKategori from './pages/master/MasterKategori';
@@ -154,12 +155,11 @@ function AppRoutes() {
           <Route path="penerimaan-resep" element={<PelayananPenerimaanResep />} />
           <Route path="penerimaan-resep/baru" element={<FormPenerimaanResep />} />
           <Route path="konseling" element={<PelayananKonseling />} />
+          <Route path="pio" element={<PelayananPio />} />
           <Route path="penebusan-resep" element={<PelayananPenebusanResep />} />
-          <Route path="penebusan-resep/baru" element={<FormPenebusanResep />} />
+
           <Route path="template-racikan" element={<PelayananTemplateRacikan />} />
-          <Route path="template-racikan/baru" element={<FormTemplateRacikan />} />
           <Route path="swamedikasi" element={<PelayananSwamedikasi />} />
-          <Route path="swamedikasi/baru" element={<FormSwamedikasi />} />
         </Route>
         <Route path="persediaan">
           <Route index element={<Navigate to="daftar-produk" />} />
@@ -232,6 +232,7 @@ function AppRoutes() {
         <Route path="master">
           <Route index element={<Navigate to="pegawai" />} />
           <Route path="pegawai" element={<MasterPegawai />} />
+          <Route path="apoteker" element={<MasterApoteker />} />
           <Route path="produk" element={<MasterProduk />} />
           <Route path="formula" element={<MasterFormula />} />
           <Route path="template-cetak" element={<MasterTemplateCetak />} />
@@ -264,6 +265,7 @@ function AppRoutes() {
           <Route path="log" element={<ManajemenLogAktivitas />} />
           <Route path="satusehat" element={<SatusehatSettings />} />
           <Route path="security" element={<SecurityMonitor />} />
+          <Route path="consolidated" element={<ConsolidatedDashboard />} />
           <Route path="whatsapp" element={<WhatsappGateway />} />
         </Route>
       </Route>

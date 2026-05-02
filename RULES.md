@@ -45,3 +45,69 @@ This document defines the UI/UX standards for the Pharmacy Management System, ba
 *   **No Placeholders**: Use real data or standard mock values.
 *   **Responsive**: Always test on Mobile (375px) and Desktop (1440px).
 *   **Iconography**: Use `react-icons/fi` (Feather Icons) for a thin, professional look.
+
+## 5. Page Layout Anatomy (Dashboard/List)
+To ensure absolute consistency across all modules (e.g., Penjualan, Kunjungan, Konseling, Resep), every standard list page **MUST** follow this exact structural hierarchy:
+
+### 5.1. Main Container
+```jsx
+<div className="animate-unt-fade">
+```
+
+### 5.2. Section Header
+Use the `SectionHeader` component for the page title, subtitle, and primary actions.
+```jsx
+<SectionHeader title="Nama Modul" subtitle="Deskripsi singkat modul.">
+  <div className="flex items-center gap-3">
+    {/* Action buttons (Button Component) */}
+  </div>
+</SectionHeader>
+```
+
+### 5.3. Filter Bar
+Placed directly below the header. Must use `bg-white dark:bg-gray-900 border border-gray-200 ... rounded-xl shadow-sm`.
+```jsx
+<div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-8 mb-6">
+  {/* Left: Primary Select Filters */}
+  {/* Right: Date Filters & Filter Lanjutan Button */}
+</div>
+```
+
+### 5.4. Data Table
+Render the `DataTable` directly without wrapping it in additional white boxes/cards. The `DataTable` component already handles its own container styling internally.
+```jsx
+<DataTable columns={columns} data={data} ... />
+```
+
+### 5.5. Rekapitulasi Banner (Bottom)
+Always include a summary banner at the bottom of the page to show key metrics about the currently viewed data.
+```jsx
+<div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden mt-6 flex justify-between items-center">
+  <div className="p-5 flex items-center gap-4 border-l-4 border-primary-500">
+     <div>
+       <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Rekapitulasi Data</h4>
+       <p className="text-xs text-gray-500 dark:text-gray-400">Deskripsi rekap.</p>
+     </div>
+  </div>
+  <div className="p-5 flex items-center gap-6 pr-8">
+     {/* Stat Items separated by vertical lines (w-px h-10 bg-gray-200) */}
+  </div>
+</div>
+```
+
+## 6. Standard Spacing & Spacing Scale
+To ensure consistent UI " breathing room\ across all modules, follow these specific utility classes:
+
+* **Page Container**: Always use <div className=\animate-unt-fade\> as the root wrapper.
+* **Header to Content**: The space between SectionHeader and the next element (usually the filter bar) must be exactly mt-8.
+* **Content to Table**: The space between the filter bar and the DataTable must be mb-6.
+* **Card/Filter Bar Padding**: All cards and filter bars must use p-4 (16px) or p-5 (20px).
+* **Inner Gaps**: Use gap-3 (12px) for button groups and gap-4 (16px) for larger layout sections.
+* **Table Cell Padding**: DataTable handles this, but custom tables should use py-3 and px-4.
+
+### Layout Checklist for Every Module:
+1. [ ] Root div: nimate-unt-fade.
+2. [ ] Header: <SectionHeader />.
+3. [ ] Filter Bar: mt-8 mb-6 p-4 rounded-xl border border-gray-200.
+4. [ ] Table: DataTable (no wrapper).
+5. [ ] Footer: Metric Banner with mt-6 border-l-4 border-primary-500.

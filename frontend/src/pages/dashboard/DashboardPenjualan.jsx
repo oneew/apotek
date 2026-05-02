@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { FiDollarSign, FiRotateCcw, FiXCircle, FiTrendingUp } from 'react-icons/fi';
-import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
 import DashboardCard from '../../components/ui/DashboardCard';
 import LinkCard from '../../components/ui/LinkCard';
@@ -27,10 +26,7 @@ export default function DashboardPenjualan() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader
-        title="Dashboard Penjualan"
-        breadcrumbs={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Dashboard Penjualan' }]}
-      />
+      <SectionHeader title="Dashboard Penjualan" />
 
       {/* ─── Riwayat Penjualan ───────────────────────────────── */}
       <SectionHeader title="Riwayat Penjualan">
@@ -39,11 +35,11 @@ export default function DashboardPenjualan() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <DashboardCard label="Total Penjualan" value={loading ? '...' : formatCurrency(data?.sales?.today_total)}
-          icon={FiDollarSign} iconBg="bg-green-100 dark:bg-green-900/30" iconColor="text-green-600 dark:text-green-400" />
+          icon={FiDollarSign} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Jumlah Transaksi" value={loading ? '...' : `${data?.sales?.today_count || 0} trx`}
-          icon={FiRotateCcw} iconBg="bg-orange-100 dark:bg-orange-900/30" iconColor="text-orange-500 dark:text-orange-400" />
+          icon={FiRotateCcw} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Penjualan Bulan Ini" value={loading ? '...' : formatCurrency(data?.sales?.month_total)}
-          icon={FiTrendingUp} iconBg="bg-blue-100 dark:bg-blue-900/30" iconColor="text-blue-600 dark:text-blue-400" />
+          icon={FiTrendingUp} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
       </div>
 
       {/* ─── Chart ────────────────────────────────────────────── */}
@@ -108,3 +104,4 @@ export default function DashboardPenjualan() {
     </div>
   );
 }
+

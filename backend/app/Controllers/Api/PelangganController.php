@@ -27,6 +27,7 @@ class PelangganController extends ResourceController
             'nama_pelanggan' => $input['nama_pelanggan'] ?? '',
             'no_telepon'     => $input['no_telepon'] ?? '',
             'alamat'         => $input['alamat'] ?? '',
+            'tanggal_lahir'  => $input['tanggal_lahir'] ?? null,
             'jenis_kelamin'  => $input['jenis_kelamin'] ?? 'L',
         ]);
 
@@ -34,6 +35,36 @@ class PelangganController extends ResourceController
             'status'  => true,
             'message' => 'Pelanggan berhasil ditambahkan',
             'data'    => ['id' => $db->insertID(), 'kode_pelanggan' => $kode]
+        ]);
+    }
+
+    public function update($id = null)
+    {
+        $input = $this->request->getJSON(true);
+        $db = \Config\Database::connect();
+
+        $db->table('m_pelanggan')->where('id', $id)->update([
+            'nama_pelanggan' => $input['nama_pelanggan'] ?? '',
+            'no_telepon'     => $input['no_telepon'] ?? '',
+            'alamat'         => $input['alamat'] ?? '',
+            'tanggal_lahir'  => $input['tanggal_lahir'] ?? null,
+            'jenis_kelamin'  => $input['jenis_kelamin'] ?? 'L',
+        ]);
+
+        return $this->respond([
+            'status'  => true,
+            'message' => 'Data pelanggan berhasil diperbarui'
+        ]);
+    }
+
+    public function delete($id = null)
+    {
+        $db = \Config\Database::connect();
+        $db->table('m_pelanggan')->where('id', $id)->delete();
+
+        return $this->respond([
+            'status'  => true,
+            'message' => 'Pelanggan berhasil dihapus'
         ]);
     }
 }

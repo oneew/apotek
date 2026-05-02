@@ -1,5 +1,4 @@
 import { FiFileText, FiShoppingBag, FiCreditCard, FiRotateCcw, FiClipboard } from 'react-icons/fi';
-import PageHeader from '../../components/ui/PageHeader';
 import Card from '../../components/ui/Card';
 import DashboardCard from '../../components/ui/DashboardCard';
 import LinkCard from '../../components/ui/LinkCard';
@@ -34,21 +33,18 @@ function EmptyTable({ columns }) {
 export default function DashboardPembelian() {
   return (
     <div className="animate-unt-fade">
-      <PageHeader
-        title="Dashboard Pembelian"
-        breadcrumbs={[{ label: 'Dashboard', path: '/dashboard' }, { label: 'Dashboard Pembelian' }]}
-      />
+      <SectionHeader title="Dashboard Pembelian" />
 
       {/* ─── Status Pembelian ────────────────────────────────── */}
       <SectionHeader title="Status Pembelian" />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <DashboardCard label="Rencana Pembelian" value="Rp 0"
-          icon={FiClipboard} iconBg="bg-teal-100 dark:bg-teal-900/30" iconColor="text-teal-600 dark:text-teal-400" />
+          icon={FiClipboard} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Pesanan Aktif" value="Rp 0"
-          icon={FiShoppingBag} iconBg="bg-blue-100 dark:bg-blue-900/30" iconColor="text-blue-600 dark:text-blue-400" />
+          icon={FiShoppingBag} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Hutang Pembelian" value="Rp 0"
-          icon={FiCreditCard} iconBg="bg-red-100 dark:bg-red-900/30" iconColor="text-red-500 dark:text-red-400" />
+          icon={FiCreditCard} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
       </div>
 
       {/* ─── Tables ──────────────────────────────────────────── */}
@@ -68,11 +64,11 @@ export default function DashboardPembelian() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <DashboardCard label="Pesanan Pembelian" value="Rp 0"
-          icon={FiFileText} iconBg="bg-purple-100 dark:bg-purple-900/30" iconColor="text-purple-600 dark:text-purple-400" />
+          icon={FiFileText} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Faktur Pembelian" value="Rp 0"
-          icon={FiFileText} iconBg="bg-blue-100 dark:bg-blue-900/30" iconColor="text-blue-600 dark:text-blue-400" />
+          icon={FiFileText} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
         <DashboardCard label="Retur Pembelian" value="Rp 0"
-          icon={FiRotateCcw} iconBg="bg-red-100 dark:bg-red-900/30" iconColor="text-red-500 dark:text-red-400" />
+          icon={FiRotateCcw} iconBg="bg-primary-100 dark:bg-primary-900/30" iconColor="text-primary-600 dark:text-primary-400" />
       </div>
 
       {/* ─── Chart ───────────────────────────────────────────── */}
@@ -97,3 +93,4 @@ export default function DashboardPembelian() {
     </div>
   );
 }
+

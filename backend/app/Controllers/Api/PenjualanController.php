@@ -23,7 +23,8 @@ class PenjualanController extends BaseController
         $db = \Config\Database::connect();
         $db->query("CREATE TABLE IF NOT EXISTS t_penjualan_tertolak (
             id INTEGER PRIMARY KEY AUTO_INCREMENT,
-            produk_id INTEGER,
+            produk_id INTEGER NULL,
+            nama_produk_manual VARCHAR(255) NULL,
             jumlah INTEGER DEFAULT 1,
             tanggal DATETIME DEFAULT CURRENT_TIMESTAMP,
             alasan TEXT,
@@ -34,16 +35,17 @@ class PenjualanController extends BaseController
     public function log_tertolak()
     {
         $data = $this->request->getJSON(true);
-        if (empty($data['produk_id'])) {
-            return $this->fail('Product ID required');
+        if (empty($data['produk_id']) && empty($data['nama_produk_manual'])) {
+            return $this->fail('Product ID or Manual Name required');
         }
 
         $db = \Config\Database::connect();
         $db->table('t_penjualan_tertolak')->insert([
-            'produk_id' => $data['produk_id'],
-            'jumlah'    => $data['jumlah'] ?? 1,
-            'alasan'    => $data['alasan'] ?? 'Stok Habis (Tertolak di Kasir)',
-            'tanggal'   => date('Y-m-d H:i:s')
+            'produk_id'          => !empty($data['produk_id']) ? $data['produk_id'] : null,
+            'nama_produk_manual' => $data['nama_produk_manual'] ?? null,
+            'jumlah'             => $data['jumlah'] ?? 1,
+            'alasan'             => $data['alasan'] ?? 'Stok Habis (Tertolak di Kasir)',
+            'tanggal'            => date('Y-m-d H:i:s')
         ]);
 
         return $this->respondCreated(['status' => true, 'message' => 'Penjualan tertolak berhasil dicatat']);
@@ -63,7 +65,10 @@ class PenjualanController extends BaseController
 
         $search = $this->request->getGet('search');
         if ($search) {
-            $builder->like('p.nama_produk', $search);
+            $builder->groupStart()
+                ->like('p.nama_produk', $search)
+                ->orLike('t.nama_produk_manual', $search)
+                ->groupEnd();
         }
 
         $data = $builder->orderBy('t.tanggal', 'DESC')->get()->getResultArray();
@@ -87,6 +92,31 @@ class PenjualanController extends BaseController
             return $this->respond(['status' => true, 'message' => 'Log tertolak berhasil dihapus']);
         }
         return $this->respond(['status' => false, 'message' => 'Gagal menghapus log'], 500);
+    }
+
+    /**
+     * PUT /api/master/penjualan/tertolak/:id
+     * Update a rejected sale log
+     */
+    public function update_tertolak($id = null)
+    {
+        $data = $this->request->getJSON(true);
+        if (empty($data['produk_id']) && empty($data['nama_produk_manual'])) {
+            return $this->fail('Product ID or Manual Name required');
+        }
+
+        $db = \Config\Database::connect();
+        $updated = $db->table('t_penjualan_tertolak')->where('id', $id)->update([
+            'produk_id'          => !empty($data['produk_id']) ? $data['produk_id'] : null,
+            'nama_produk_manual' => $data['nama_produk_manual'] ?? null,
+            'jumlah'             => $data['jumlah'] ?? 1,
+            'alasan'             => $data['alasan'] ?? 'Stok Habis (Tertolak di Kasir)',
+        ]);
+
+        if ($updated !== false) {
+            return $this->respond(['status' => true, 'message' => 'Log tertolak berhasil diperbarui']);
+        }
+        return $this->respond(['status' => false, 'message' => 'Gagal memperbarui log'], 500);
     }
 
     /**
@@ -293,6 +323,20 @@ class PenjualanController extends BaseController
                     loyalty_points = loyalty_points + " . ((int)$earnedPoints - (int)$redeemedPoints) . "
                 WHERE id = " . (int)$data['pelanggan_id'] . "
             ");
+        }
+
+        // 4. Update Resep Status if processed from Penebusan Resep
+        if (!empty($data['resep_id'])) {
+            $db->table('t_resep')
+               ->where('id', $data['resep_id'])
+               ->update(['status' => 'Selesai']);
+        }
+        
+        // 5. Update Swamedikasi Status if processed from Kasir
+        if (!empty($data['swamedikasi_id'])) {
+            $db->table('t_swamedikasi')
+               ->where('id', $data['swamedikasi_id'])
+               ->update(['status' => 'Selesai']);
         }
 
         $db->transComplete();

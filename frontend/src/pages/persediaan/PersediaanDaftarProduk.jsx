@@ -33,53 +33,47 @@ export default function PersediaanDaftarProduk() {
   };
 
   const columns = [
-    { label: 'Product Details', key: 'nama_produk', render: (val, row) => (
+    { label: 'Intelligence Insight', key: 'nama_produk', render: (val, row) => (
       <div className="flex flex-col py-0.5">
-        <span className="font-semibold text-gray-900 dark:text-gray-100 uppercase text-xs">{val}</span>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[10px] text-gray-400 font-medium uppercase tracking-tight">SKU: {row.sku || 'N/A'}</span>
-          <span className="w-1 h-1 rounded-full bg-gray-300" />
-          <span className="text-[10px] text-primary-600 font-bold uppercase">{row.kategori || 'GENERAL'}</span>
+        <span className="font-bold text-gray-900 dark:text-gray-100 uppercase text-xs tracking-tight">{val}</span>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-[9px] font-black bg-primary-50 text-primary-700 px-1.5 py-0.5 rounded border border-primary-100 uppercase">SKU: {row.sku || 'N/A'}</span>
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">Loc: {row.nama_rak || 'W-MAIN'}</span>
         </div>
       </div>
     )},
-    { label: 'Shelving', key: 'nama_rak', width: '120px', render: (val) => (
-       <div className="flex items-center gap-2">
-         <span className="text-[11px] font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-tight">{val || 'W-MAIN'}</span>
-       </div>
-    )},
-    { label: 'Stock Balance', key: 'stok_total', width: '160px', render: (val, row) => {
+    { label: 'Velocity', key: 'stok_total', width: '140px', render: (val, row) => {
       const isLow = row.stok_minimal > 0 && val <= row.stok_minimal;
       return (
-        <div className="flex items-center gap-2">
-          <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-            isLow 
-              ? 'bg-error-50 text-error-700 border border-error-100 dark:bg-error-950/20 dark:border-error-900' 
-              : 'bg-success-50 text-success-700 border border-success-100 dark:bg-success-950/20 dark:border-success-900'
-          }`}>
-            {val} <span className="text-[10px] opacity-80 ml-0.5 font-bold">{row.nama_satuan_terkecil || 'unit'}</span>
-          </span>
-          {isLow && <FiAlertCircle size={14} className="text-error-500" />}
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <span className={`text-sm font-black tabular-nums ${isLow ? 'text-error-600' : 'text-gray-900'}`}>{val}</span>
+            <span className="text-[10px] font-bold text-gray-400 uppercase">{row.nama_satuan_terkecil || 'unit'}</span>
+          </div>
+          <div className="w-16 h-1 bg-gray-100 rounded-full mt-1 overflow-hidden">
+            <div className={`h-full rounded-full ${isLow ? 'bg-error-500' : 'bg-success-500'}`} style={{ width: isLow ? '20%' : '80%' }}></div>
+          </div>
         </div>
       );
     }},
-    { label: 'Acq. Price', key: 'harga_beli_referensi', align: 'right', width: '140px', render: (val) => (
-      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100 tabular-nums">
-        Rp {parseInt(val || 0).toLocaleString('id-ID')}
-      </span>
+    { label: 'Aquisition/Margin', key: 'harga_beli_referensi', align: 'right', width: '160px', render: (val, row) => (
+      <div className="flex flex-col items-end">
+        <span className="text-sm font-bold text-gray-900 tabular-nums">Rp {parseInt(val || 0).toLocaleString('id-ID')}</span>
+        <span className="text-[9px] font-bold text-success-600 uppercase tracking-widest mt-0.5">Est. Margin: +30%</span>
+      </div>
     )},
     { 
-      label: '', 
+      label: 'Analytics', 
       key: 'actions', 
       align: 'right',
-      width: '140px',
+      width: '180px',
       render: (_, row) => (
-        <div className="flex items-center justify-end">
+        <div className="flex items-center justify-end gap-2">
           <button 
             onClick={() => { setSelectedProductId(row.id); setShowCardModal(true); }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-all border border-transparent hover:border-gray-200 dark:hover:border-gray-700"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-black uppercase bg-white dark:bg-gray-800 text-gray-600 hover:text-primary-600 border border-gray-200 dark:border-gray-700 hover:border-primary-300 rounded-lg shadow-sm transition-all"
           >
-            <FiArchive size={14} /> Audit Trail
+            <FiArchive size={12} /> Kartu Stok
           </button>
         </div>
       )
@@ -87,28 +81,43 @@ export default function PersediaanDaftarProduk() {
   ];
 
   return (
-    <div className="max-w-[1440px] mx-auto space-y-6 pb-20">
+    <div className="max-w-[1440px] mx-auto space-y-6 pb-20 animate-unt-fade">
       <SectionHeader 
-        title="Inventory Catalog" 
-        subtitle="Real-time monitoring of pharmaceutical stock levels and storage allocation."
-        icon={<FiBox className="text-gray-500" size={24} />}
+        title="Product Intelligence 360" 
+        subtitle="Analisis terpadu persediaan, mutasi kartu stok, dan efisiensi modal dalam satu jendela."
+        icon={<FiBox className="text-primary-600" size={24} />}
       />
 
-      {/* Stats Overview - Untitled UI Style (Compact) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: 'Registered Assets', value: summary.total_produk, sub: 'Total SKUs in repository', color: 'primary' },
-          { label: 'Low Stock Alerts', value: summary.stok_menipis, sub: 'Requires replenishment', color: 'error' },
-          { label: 'Total Valuation', value: 'Rp 12.5M', sub: 'Current asset valuation', color: 'success' },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col justify-between h-32">
-            <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{stat.label}</span>
-            <div className="flex items-baseline gap-2 mt-auto">
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{stat.value}</h3>
-              <span className="text-[10px] font-medium text-gray-400 dark:text-gray-500 uppercase">{stat.sub}</span>
-            </div>
+      {/* Strategic Intelligence Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Stock Health</p>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-2xl font-black text-gray-900 dark:text-white">{( ( (data.length - summary.stok_menipis) / (data.length || 1) ) * 100).toFixed(1)}%</h3>
+            <span className="text-[11px] font-bold text-success-600 uppercase">Optimal</span>
           </div>
-        ))}
+        </div>
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Critically Low</p>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-2xl font-black text-error-600">{summary.stok_menipis}</h3>
+            <span className="text-[11px] font-bold text-gray-400 uppercase">SKU</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Expiry Risk (90d)</p>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-2xl font-black text-warning-600">{summary.akan_kadaluarsa || 0}</h3>
+            <span className="text-[11px] font-bold text-gray-400 uppercase">SKU</span>
+          </div>
+        </div>
+        <div className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm">
+          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Asset Valuation</p>
+          <div className="flex items-baseline gap-2">
+            <h3 className="text-2xl font-black text-success-600">Rp 12.5M</h3>
+            <span className="text-[11px] font-bold text-gray-400 uppercase">Total</span>
+          </div>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 shadow-sm">
@@ -118,11 +127,11 @@ export default function PersediaanDaftarProduk() {
           isLoading={isLoading} 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
-          searchPlaceholder="Filter inventory by name, SKU or classification..."
+          searchPlaceholder="Cari berdasarkan nama produk, SKU, atau kategori..."
           primaryAction={{
-            label: "Download Report",
+            label: "Export Analytics",
             onClick: () => console.log('Exporting...'),
-            icon: <FiDownload size={14} className="mr-1" />
+            icon: <FiDownload size={14} />
           }}
         />
       </div>

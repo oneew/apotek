@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import PageHeader from '../../../components/ui/PageHeader';
+import SectionHeader from '../../../components/ui/SectionHeader';
 import Card from '../../../components/ui/Card';
 import { FiSearch, FiRefreshCw, FiFileText, FiDollarSign, FiAlertTriangle, FiEye } from 'react-icons/fi';
 import ModalDialog from '../../../components/ui/ModalDialog';
@@ -44,10 +44,9 @@ export default function PenjualanRetur() {
 
   return (
     <div className="animate-unt-fade">
-      <PageHeader
+      <SectionHeader
         title="Retur Penjualan"
         subtitle="Daftar transaksi yang telah diretur atau dibatalkan."
-        breadcrumbs={[{ label: 'Penjualan', path: '/penjualan' }, { label: 'Retur Penjualan' }]}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">

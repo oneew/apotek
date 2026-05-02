@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Traits\Loggable;
 
 class ProdukModel extends Model
 {
+    use Loggable;
+
     protected $table            = 'm_produk';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
@@ -21,7 +24,11 @@ class ProdukModel extends Model
         'zat_aktif', 'bentuk_sediaan', 'komisi_jenis', 'komisi_nilai'
     ];
 
-    // Karena di schema DB sudah di-set DEFAULT CURRENT_TIMESTAMP, 
-    // kita matikan useTimestamps CodeIgniter agar DB yang menghandle.
     protected $useTimestamps = false; 
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->initializeLoggable();
+    }
 }

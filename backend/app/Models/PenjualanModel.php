@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use CodeIgniter\Model;
+use App\Traits\Loggable;
 
 class PenjualanModel extends Model
 {
+    use Loggable;
+
     protected $table            = 't_penjualan';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
@@ -15,6 +18,12 @@ class PenjualanModel extends Model
         'total_belanja', 'diskon_nota', 'total_bayar', 'uang_diterima', 
         'uang_kembali', 'jenis_pembayaran', 'status_penjualan', 'keterangan'
     ];
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->initializeLoggable();
+    }
 
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';

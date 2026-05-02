@@ -119,7 +119,7 @@ class ResepController extends ResourceController
         if (!$resep) return $this->respond(['status' => false, 'message' => 'Resep tidak ditemukan'], 404);
         
         $items = $db->table('t_resep_detail as d')
-            ->select('d.*, pr.nama_produk, pr.sku, pr.stok_total, pr.harga_beli_referensi')
+            ->select('d.*, pr.nama_produk, pr.sku, pr.harga_beli_referensi, pr.harga_jual_utama')
             ->join('m_produk as pr', 'pr.id = d.produk_id', 'left')
             ->where('d.resep_id', $resep['id'])
             ->get()->getResultArray();
@@ -127,5 +127,22 @@ class ResepController extends ResourceController
         $resep['items'] = $items;
         
         return $this->respond(['status' => true, 'data' => $resep]);
+    }
+
+    public function updateStatus($id = null)
+    {
+        $input = $this->request->getJSON(true);
+        if (empty($input['status'])) {
+            return $this->respond(['status' => false, 'message' => 'Status tidak boleh kosong'], 400);
+        }
+
+        $db = \Config\Database::connect();
+        $updated = $db->table('t_resep')->where('id', $id)->update(['status' => $input['status']]);
+
+        if ($updated) {
+            return $this->respond(['status' => true, 'message' => 'Status resep berhasil diperbarui']);
+        }
+
+        return $this->respond(['status' => false, 'message' => 'Gagal memperbarui status resep'], 500);
     }
 }
